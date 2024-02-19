@@ -4,6 +4,7 @@ import pygame.freetype
 import time
 import random
 import math
+import signal
 import numpy as np
 
 from models.table import Table
@@ -18,16 +19,10 @@ RING_BACKGROUND = (10,20,20)
 
 import numpy as np
 
-circle_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255), (128, 128, 128), (255, 165, 0)]
-
 class TableDisplay:
     def __init__(self, table_api):
-
+        self.use_display = True
         self.broadcast = False
-
-        pygame.init()
-        pygame.font.init()
-
         self.running = True
         self.max_frame_rate = 100
         self.clock = pygame.time.Clock()
@@ -37,12 +32,18 @@ class TableDisplay:
         self.last_stats_collection = time.time()
         self.tick_count = 0
         self.table_api = table_api
-        self.setup_display()
         self.setup_table_model()
         self.screen_background_color = SCREEN_BACKGROUND
         self.event_list = []
+        #signal.signal(signal.SIGUSR1, self.quit)
+        #signal.siginterrupt(signal.SIGUSR1, False)
+        self.original_sigint = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, self.kill)
 
     def setup_display(self):
+        pygame.init()
+        pygame.font.init()
+
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Set your desired window size
         self.base_font = pygame.font.SysFont('default', 30)
 
@@ -117,10 +118,6 @@ class TableDisplay:
                 for i, color in enumerate(node.colors_rgb):
                     pixel_center = (self.node_positions[node.id][0]+int(self.x_positions[i]),self.node_positions[node.id][1]+int(self.y_positions[i]))
                     pygame.draw.circle(self.screen, color, pixel_center, 5)  # Adjust radius as needed
-            else:
-                for i, color in enumerate(circle_colors):
-                    pixel_center = (self.node_positions[node.id][0]+int(self.x_positions[i]),self.node_positions[node.id][1]+int(self.y_positions[i]))
-                    pygame.draw.circle(self.screen, color[0:3], pixel_center, 5)  # Adjust radius as needed
 
             node_label = self.base_font.render("id: " + str(node.id), True, (100,80,0))
             coord = self.table_api.getCubeCoordinate(node.id)
@@ -141,23 +138,35 @@ class TableDisplay:
     def quit(self):
         pass
 
-    def run(self):
-        while self.running:
-            self.event_list = pygame.event.get()
+    def kill(self, signum, frame):
+        self.running = False
+        # restore original handler
+        signal.signal(signal.SIGINT, self.original_sigint)
 
-            for event in self.event_list:
-                if event.type == pygame.QUIT:
-                    self.running = False
+    def run(self):
+        if self.use_display:
+            self.setup_display()
+
+        while self.running:
+
+            if self.use_display:
+                self.event_list = pygame.event.get()
+
+                for event in self.event_list:
+                    if event.type == pygame.QUIT:
+                        self.running = False
 
             self.tick()
             self.tick_count += 1
 
-            self.update_display()
-            pygame.display.flip()
+            if self.use_display:
+                self.update_display()
+                pygame.display.flip()
 
             self.clock.tick(self.max_frame_rate)  # Cap the frame rate
             self.update_stats()
         self.quit()
-        pygame.quit()
+        if self.use_display:
+            pygame.quit()
 
 # You might need additional methods for loading data, handling input, etc.

@@ -33,6 +33,7 @@ def int_to_wrgb_tuple(color_int):
     b = color_int & 0xFF
     return (w, r, g, b)
 
+# return a numpy array of 32-bit ints, representing the color
 def fill_between(length, index_a, index_b, rgb_tuple, direction='clockwise'):
     color = rgb_tuple_to_int(rgb_tuple)
     arr = np.zeros(length)  
@@ -53,6 +54,7 @@ def fill_between(length, index_a, index_b, rgb_tuple, direction='clockwise'):
             arr[:index_a + 1] = color
     
     return arr
+
 
 def unpack_artnet_data_to_rgb_2d(data, pixels_per_node=8, drop_w=False):
     """ Chunk the list of RGB tuples into sub-lists of length 'pixels_per_node' """

@@ -1,4 +1,3 @@
-d # pygame-demo.py
 """
 This example file shows how to create an TCTable simulator
 It uses python bindings to the table api update the local model,

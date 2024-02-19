@@ -4,8 +4,6 @@ It uses python bindings to the table api to send artnet messages
 To the clusters.  It also uses the api to act as a listener to
 monitor sensor events
 """
-
-# pygame-demo.py
 import os
 import sys
 import time
@@ -28,7 +26,7 @@ class TableController(TableDisplay):
 
         self.screen_background_color = (0, 0, 0)
         self.broadcast = True
-        self.max_frame_rate = 120
+        self.max_frame_rate = 60
         # keep a list of touched nodes
         # but newer-touches are at the 
         # beginning

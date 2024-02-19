@@ -4,8 +4,6 @@ It uses python bindings to the table api to send artnet messages
 To the clusters.  It also uses the api to act as a listener to
 monitor sensor events
 """
-
-# pygame-demo.py
 import os
 import sys
 import time

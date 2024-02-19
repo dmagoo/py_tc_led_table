@@ -5,7 +5,6 @@ To the clusters.  It also uses the api to act as a listener to
 monitor sensor events
 """
 
-# pygame-demo.py
 import os
 import sys
 import time
@@ -48,7 +47,7 @@ class ControllerApp(TableController):
                 else:
                     (pixel_facing_start, pixelB) =  self.table_api.getFacingPixelIndexes(current_node,  self.test_node_a)
                     (pixel_facing_end, pixelB) =  self.table_api.getFacingPixelIndexes(current_node,  self.test_node_b)
-                    fill = fill_between(8, pixel_facing_start, pixel_facing_end, (100,200,100), 'clockwise' if path_index % 2 == 0 else 'counter_clockwise')
+                    fill = fill_between(8, pixel_facing_start, pixel_facing_end, (100,200,100), direction = 'clockwise' if path_index % 2 == 0 else 'counter_clockwise')
                     self.table_api.fillNode(current_node, fill.astype(int).tolist(), 0)
                 last_node = current_node
             else:
@@ -65,6 +64,10 @@ def main():
 
     tc_led_table.init(config=led_table_config)
     app = ControllerApp(tc_led_table)  # Create an instance of the App class
+
+    # to run without the pygame display:
+    # self.use_display = False
+
     app.run()  # Start the app's main loop
 
 if __name__ == "__main__":
