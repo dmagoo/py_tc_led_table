@@ -1,0 +1,3 @@
+[submodule "lib/tc_led_table"]
+	path = lib/tc_led_table
+	url = https://github.com/dmagoo/TC_LED_Table.git
