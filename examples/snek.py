@@ -63,7 +63,7 @@ MIN_SNEK_SPEED = 0
 
 class Snek():
     def __init__(self):
-        self.color = (0, 255, 0, 0)
+        self.color = (0, 30, 0, 0)
         self.length = 1
         # how many ticks to move a pixel
         # pixels per second
@@ -157,18 +157,18 @@ class ControllerApp(TableController):
         super().__init__(table_api)
         # WIP: self.table_buffer = TableBuffer()
         snek = Snek()
-        snek.speed = 30
+        snek.speed = 15
 
         snek2 = Snek()
-        snek2.color = (0, 0, 255, 255)
+        snek2.color = (0, 0, 30, 30)
         snek2.speed = 17
 
         snek3 = Snek()
-        snek3.color = (0, 255, 255, 0)
+        snek3.color = (0, 30, 30, 0)
         snek3.speed = 12
 
         snek4 = Snek()
-        snek4.color = (0, 80, 255, 100)
+        snek4.color = (0, 15, 30, 22)
         snek4.speed = 6
 
         self.snek_stack = [

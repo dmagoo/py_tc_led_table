@@ -7,7 +7,6 @@ monitor sensor events
 
 import os
 import sys
-import time
 import random
 
 script_dir = os.path.dirname(__file__)
