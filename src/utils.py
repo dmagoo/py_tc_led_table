@@ -1,3 +1,4 @@
+from enum import Enum
 import numpy as np
 import struct
 
@@ -56,7 +57,7 @@ def fill_between(length, index_a, index_b, rgb_tuple, direction='clockwise'):
     return arr
 
 
-def unpack_artnet_data_to_rgb_2d(data, pixels_per_node=8, drop_w=False):
+def unpack_artnet_data_to_rgb_2dOLD(data, pixels_per_node=8, drop_w=False):
     """ Chunk the list of RGB tuples into sub-lists of length 'pixels_per_node' """
     # Initialize the list to hold the RGB or WRGB tuples
     tuples = []
@@ -75,3 +76,53 @@ def unpack_artnet_data_to_rgb_2d(data, pixels_per_node=8, drop_w=False):
     # Chunk the list of tuples into sub-lists of length 'pixels_per_node'
     tuple_chunks = [tuples[i:i + pixels_per_node] for i in range(0, len(tuples), pixels_per_node)]
     return tuple_chunks
+
+class ARTNET_PACKET_FORMAT(Enum):
+    RGBW = 1
+    WRGB = 2
+    GRBW = 3
+
+def rewire_pixel(color_tuple, format):
+    """ take a tuple of color components and return them as
+        a normalized WRGB
+    """
+    (a,b,c,d) = color_tuple
+    return {
+        ARTNET_PACKET_FORMAT.WRGB: (a,b,c,d),
+        ARTNET_PACKET_FORMAT.GRBW: (d,b,a,c),
+        ARTNET_PACKET_FORMAT.RGBW: (d,a,b,c)
+    }[format]
+
+def unpack_artnet_data_to_rgb_2d(data, pixels_per_node=8, format=ARTNET_PACKET_FORMAT.GRBW):
+    """ Chunk the list of RGB tuples into sub-lists of length 'pixels_per_node' """
+    # Initialize the list to hold the RGB or WRGB tuples
+    tuples = []
+
+    # Iterate over the data in steps of 4 bytes (32 bits)
+    for i in range(0, len(data), 4):
+        # Unpack 4 bytes at a time, capturing W, R, G, and B components
+        color_tuple = struct.unpack('4B', data[i:i+4])
+        tuples.append(rewire_pixel(color_tuple, format))
+
+    # Chunk the list of tuples into sub-lists of length 'pixels_per_node'
+    tuple_chunks = [tuples[i:i + pixels_per_node] for i in range(0, len(tuples), pixels_per_node)]
+    return tuple_chunks
+
+
+def gamma_correct(value, gamma):
+    return value ** gamma
+
+def apply_gamma_correction(color, gamma_r, gamma_g, gamma_b):
+    r_corrected = int(gamma_correct(color[0] / 255, gamma_r) * 255)
+    g_corrected = int(gamma_correct(color[1] / 255, gamma_g) * 255)
+    b_corrected = int(gamma_correct(color[2] / 255, gamma_b) * 255)
+    return (r_corrected, g_corrected, b_corrected)
+
+# Example usage:
+"""
+gamma_r = 2.4  # Gamma value for the red component
+gamma_g = 2.2  # Gamma value for the green component
+gamma_b = 2.8  # Gamma value for the blue component
+color = (r, g, b)  # Your RGB color values
+corrected_color = apply_gamma_correction(color, gamma_r, gamma_g, gamma_b)
+"""

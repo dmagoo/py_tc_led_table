@@ -14,7 +14,11 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/
+lib/*
+!lib/.gitmodules
+!lib/tc_led_table
+!lib/tc_led_table/**
 lib64/
 parts/
 sdist/
