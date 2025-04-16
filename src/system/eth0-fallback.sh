@@ -14,6 +14,7 @@ if [ $? -ne 0 ]; then
     ip addr flush dev eth0
     ip addr add 192.168.1.10/24 dev eth0
     ip link set eth0 up
+    ip route add default via 192.168.1.1 dev eth0
 
     # Start dnsmasq manually
     systemctl start dnsmasq
