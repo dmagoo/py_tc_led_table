@@ -1,0 +1,17 @@
+# /etc/systemd/system/status-server.service
+# Copy from: src/system/status-server.service
+# Launches Flask-based network status server at boot
+# Runs: /home/tcledtable/projects/py_tc_led_table/src/system/web/status_server.py
+
+[Unit]
+Description=LED Table Status Server (Flask)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/tcledtable/projects/py_tc_led_table/src/system/web/status_server.py
+WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
+Restart=on-failure
+User=tcledtable
+
+[Install]
+WantedBy=multi-user.target

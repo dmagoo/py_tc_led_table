@@ -1,0 +1,14 @@
+# Copy to: /etc/systemd/system/eth0-fallback.service
+# Enable with: sudo systemctl enable eth0-fallback.service
+[Unit]
+Description=Ethernet DHCP fallback service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/eth0-fallback.sh
+Type=oneshot
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+# /etc/systemd/system/wlan0-fallback.service
+# Copy to: /etc/systemd/system/
+# Enable with: sudo systemctl enable wlan0-fallback.service
+# Starts the fallback hotspot script at boot
+
+[Unit]
+Description=Wi-Fi DHCP fallback (hotspot) service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/wlan0-fallback.sh
+Type=oneshot
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
