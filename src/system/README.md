@@ -61,8 +61,9 @@ fi
 
 ### GPIO Reserved for Shutdown (Noted)
 Referenced in docs/comment sturcture, the pin connected to a script generates a safe shutdown when tapped.
-
-Please added to DII from terminal output.
-
+```sh
+nano /boot/config.txt:
+dtoverlay=gpio-shutdown,gpio_pin=21
+```
 ### Safety
 This configuration has been tested via both SHS and hotspot. Should not lock users from the system.
