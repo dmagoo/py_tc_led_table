@@ -59,8 +59,8 @@ fi
 ```
 
 
-### GPIO Reserved for Shutdown (Noted)
-Referenced in docs/comment sturcture, the pin connected to a script generates a safe shutdown when tapped.
+### GPIO Reserved for Shutdown
+Connect a button between gpio 21 and ground to safely shut down the system
 ```sh
 nano /boot/config.txt:
 dtoverlay=gpio-shutdown,gpio_pin=21
