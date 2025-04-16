@@ -1,0 +1,24 @@
+# /etc/systemd/system/monitor-serial.service
+# This file should be placed in /etc/systemd/system/monitor-serial.service
+# It will start the serial monitor script at boot and keep it running
+# To install and enable the service:
+# 1. sudo cp src/system/monitor-serial.service /etc/systemd/system/
+# 2. sudo systemctl daemon-reload
+# 3. sudo systemctl enable monitor-serial.service
+# 4. sudo systemctl start monitor-serial.service
+# To stop or restart:
+# 5. sudo systemctl stop monitor-serial.service
+# 6. sudo systemctl restart monitor-serial.service
+
+[Unit]
+Description=LED Table Serial Monitor
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/tcledtable/projects/py_tc_led_table/scripts/monitor_serial.py
+WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
+Restart=always
+User=tcledtable
+
+[Install]
+WantedBy=multi-user.target

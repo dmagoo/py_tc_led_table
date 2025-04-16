@@ -1,3 +1,6 @@
+# NOTE. This requires usb privileges:
+# as the user running the program, do:
+# sudo usermod -aG dialout $USER
 import json
 import os
 import sys
@@ -11,6 +14,16 @@ sys.path.append('src')
 sys.path.append('src/pygame')
 sys.path.append('src/config')
 sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
+
+
+import platform
+
+bindings_dir = 'lib/tc_led_table/python_bindings'
+if platform.system() == 'Windows':
+    bindings_dir = os.path.join(bindings_dir, 'Release')
+
+sys.path.append(os.path.abspath(bindings_dir))
+
 import tc_led_table, tc_sensor_transmitter
 from settings import add_sensor_transmit_config,add_monitor_config
 
