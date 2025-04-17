@@ -1,0 +1,15 @@
+[Unit]
+Description=Effect Runner for LED Table
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/manage_effects.sh
+WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
+User=tcledtable
+Group=tcledtable
+Environment=PYTHONUNBUFFERED=1
+ExecStop=/bin/kill -SIGINT $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
