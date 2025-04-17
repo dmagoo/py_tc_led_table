@@ -16,6 +16,16 @@ sys.path.append('src/pygame')
 sys.path.append('src/config')
 sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
 
+import platform
+
+bindings_dir = 'lib/tc_led_table/python_bindings'
+if platform.system() == 'Windows':
+    bindings_dir = os.path.join(bindings_dir, 'Release')
+
+sys.path.append(os.path.abspath(bindings_dir))
+
+
+
 import tc_led_table
 from settings import add_controller_config, add_sensor_listener_config
 from utils import wrgb_tuple_to_int
@@ -41,6 +51,7 @@ class ControllerApp(TableController):
         l2_neighbor_nodes = self.table_api.getNodeNeighbors(node_id, 2)
         l3_neighbor_nodes = self.table_api.getNodeNeighbors(node_id, 3)
         self.ripple_brightness[node_id] = 1
+
         for neighbor_node_id in l1_neighbor_nodes:
             if neighbor_node_id >= 0:
                 if self.ripple_timers.get(neighbor_node_id):
@@ -114,6 +125,7 @@ def main():
 
     tc_led_table.init(config=led_table_config)
     app = ControllerApp(tc_led_table)  # Create an instance of the App class
+    app.use_display  = False
     app.run()  # Start the app's main loop
 
 if __name__ == "__main__":
