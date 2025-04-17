@@ -6,6 +6,7 @@ import random
 import math
 import signal
 import numpy as np
+import threading
 
 from models.table import Table
 from models.node import Node
@@ -39,6 +40,8 @@ class TableDisplay:
         #signal.siginterrupt(signal.SIGUSR1, False)
         self.original_sigint = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, self.kill)
+
+        self._exit_event = threading.Event()  # Added for graceful shutdown
 
     def setup_display(self):
         pygame.init()
@@ -133,10 +136,15 @@ class TableDisplay:
         if delta_time > 0:
             self.current_frame_rate = 1.0 / delta_time
         #    if self.tick_count % 100 == 0:
-        #        print(f"--------------------------------------------- Current Frame Rate: {self.current_frame_rate:.2f} FPS") 
+        #        print(f"--------------------------------------------- Current Frame Rate: {self.current_frame_rate:.2f} FPS")
 
     def quit(self):
         pass
+
+    def stop(self):
+        """ Meant as a public method to stop the app gracefully """
+        self.running = False
+        self._exit_event.set()  # Signal the main loop to exit
 
     def kill(self, signum, frame):
         self.running = False
@@ -169,4 +177,6 @@ class TableDisplay:
         if self.use_display:
             pygame.quit()
 
-# You might need additional methods for loading data, handling input, etc.
+    def wait_until_done(self):
+        """ Block until the main loop stops """
+        self._exit_event.wait()  # Wait for stop() to signal that the loop should exit
