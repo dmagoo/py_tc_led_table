@@ -23,8 +23,8 @@ from TableController import TableController  # Import the App class from app.py
 
 NODE_COUNT = 37
 
-class ControllerApp(TableController):
-    def __init__(self, table_api):
+class Ripple(TableController):
+    def __init__(self, table_api, params):
         super().__init__(table_api)
         self.default_ripple_time = 29
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
@@ -113,7 +113,7 @@ def main():
     led_table_config = add_sensor_listener_config(led_table_config)
 
     tc_led_table.init(config=led_table_config)
-    app = ControllerApp(tc_led_table)  # Create an instance of the App class
+    app = Ripple(tc_led_table)  # Create an instance of the App class
     app.run()  # Start the app's main loop
 
 if __name__ == "__main__":
