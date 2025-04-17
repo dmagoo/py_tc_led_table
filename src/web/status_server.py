@@ -3,6 +3,7 @@
 from flask import Flask, jsonify
 import socket
 import subprocess
+import os
 
 app = Flask(__name__)
 
@@ -26,16 +27,29 @@ def get_interface_status(interface):
     except Exception:
         return "unknown"
 
-@app.route("/status/network")
-def network_status():
+def check_serial_monitor():
+    # Use systemctl to check if the service is active
+    process_check = os.system("systemctl is-active --quiet monitor-serial.service")
+    return process_check == 0
+
+    process_check = os.system("pgrep -f monitor_serial.py")
+    return process_check == 0
+
+@app.route("/status")
+def status():
     return jsonify({
-        "eth0": {
-            "ip": get_ip("eth0"),
-            "status": get_interface_status("eth0")
+        "network": {
+            "eth0": {
+                "ip": get_ip("eth0"),
+                "status": get_interface_status("eth0")
+            },
+            "wlan0": {
+                "ip": get_ip("wlan0"),
+                "status": get_interface_status("wlan0")
+            }
         },
-        "wlan0": {
-            "ip": get_ip("wlan0"),
-            "status": get_interface_status("wlan0")
+        "serial_monitor": {
+            "status": "running" if check_serial_monitor() else "not running"
         }
     })
 

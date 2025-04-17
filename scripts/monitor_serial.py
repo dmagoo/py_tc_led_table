@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # NOTE. This requires usb privileges:
 # as the user running the program, do:
 # sudo usermod -aG dialout $USER
@@ -25,7 +26,7 @@ if platform.system() == 'Windows':
 sys.path.append(os.path.abspath(bindings_dir))
 
 import tc_led_table, tc_sensor_transmitter
-from settings import add_sensor_transmit_config,add_monitor_config
+from settings import add_sensor_transmit_config, add_monitor_config
 
 
 EXPECTED_CLUSTER_COUNT = 4
@@ -76,7 +77,7 @@ def handle_message(port_path, line):
                     active_cluster_ids.add(cluster_id)
                     print(f"Device on {port_path} confirmed with clusterId {cluster_id}")
 
-        elif event == "touch_event": # or event == "periodic_touch_status":
+        elif event == "touch_event":  # or event == "periodic_touch_status":
             print(data)
             for item in data.get("sensorData", []):
                 node_id = item["nodeId"]
@@ -85,6 +86,16 @@ def handle_message(port_path, line):
                 sensor_api.sendTouchSensorEvent(node_id, value, touched)
     except Exception as e:
         print(f"[ERROR] Failed to handle message from {port_path}: {e}")
+
+def get_connected_devices():
+    # List all connected serial devices
+    ports = serial.tools.list_ports.comports()
+    connected_devices = []
+    
+    for port in ports:
+        connected_devices.append(port.device)
+    
+    return connected_devices
 
 def monitor_device(port_path):
     try:
@@ -96,17 +107,26 @@ def monitor_device(port_path):
     except Exception as e:
         print(f"[ERROR] Monitoring failed for {port_path}: {e}")
 
-def main():
-    ports = serial.tools.list_ports.comports()
-    threads = []
-    for port in ports:
-        t = threading.Thread(target=monitor_device, args=(port.device,))
-        t.daemon = True
-        t.start()
-        threads.append(t)
+def monitor_all_devices():
+    # Monitor all connected devices and report status
+    connected_devices = get_connected_devices()
+    if len(connected_devices) == 0:
+        print("[ERROR] No devices connected.")
+    else:
+        print(f"Connected devices: {connected_devices}")
+        # Start monitoring the devices in separate threads
+        threads = []
+        for port in connected_devices:
+            t = threading.Thread(target=monitor_device, args=(port,))
+            t.daemon = True
+            t.start()
+            threads.append(t)
+        # Keep the main thread alive
+        while True:
+            time.sleep(60)
 
-    while True:
-        time.sleep(60)
+def main():
+    monitor_all_devices()
 
 if __name__ == "__main__":
     main()

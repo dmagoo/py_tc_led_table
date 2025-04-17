@@ -8,7 +8,17 @@ script_dir = os.path.dirname(__file__)
 sys.path.append('src')
 sys.path.append('src/pygame')
 sys.path.append('src/config')
+print(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
 sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
+
+import platform
+
+bindings_dir = 'lib/tc_led_table/python_bindings'
+if platform.system() == 'Windows':
+    bindings_dir = os.path.join(bindings_dir, 'Release')
+
+sys.path.append(os.path.abspath(bindings_dir))
+
 
 import tc_led_table
 from settings import add_controller_config, add_sensor_listener_config
@@ -161,7 +171,7 @@ class SnekApp(TableController):
 
         snek2 = Snek()
         snek2.color = (0, 0, 30, 30)
-        snek2.speed = 17
+        snek2.speed = 4
 
         snek3 = Snek()
         snek3.color = (0, 30, 30, 0)
@@ -173,9 +183,9 @@ class SnekApp(TableController):
 
         self.snek_stack = [
             snek,
-            snek2,
-            snek3,
-            snek4
+            snek2
+            #snek3,
+            #snek4
         ]
 
         self.current_snek_idx = -1
@@ -220,7 +230,7 @@ def main():
     app = SnekApp(tc_led_table)  # Create an instance of the App class
 
     # to run without the pygame display:
-    self.use_display = False
+    app.use_display = False
 
     app.run()  # Start the app's main loop
 

@@ -16,6 +16,16 @@ sys.path.append('src/pygame')
 sys.path.append('src/config')
 sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
 
+import platform
+
+bindings_dir = 'lib/tc_led_table/python_bindings'
+if platform.system() == 'Windows':
+    bindings_dir = os.path.join(bindings_dir, 'Release')
+
+sys.path.append(os.path.abspath(bindings_dir))
+
+
+
 import tc_led_table
 from settings import add_controller_config, add_sensor_listener_config
 from utils import wrgb_tuple_to_int
@@ -44,6 +54,9 @@ class ControllerApp(TableController):
         if node_id == 4:
              self.node_wrgb[3] = min(self.node_wrgb[3] + 5, 255)
 
+        if node_id == 17:
+             self.node_wrgb[3] = min(self.node_wrgb[3] + 5, 255)
+             
         self.changed = True
     def doEffectLoop(self):
         if self.changed:
