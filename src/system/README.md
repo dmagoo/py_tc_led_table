@@ -1,52 +1,55 @@
+# LED Table Raspberry Pi System Setup
 
-# LED Table Raspberry Pi System SetUp
 This document describes the current system configuration for the Raspberry Pi used in the LED Table project. This includes final setups, scripts, and safety-net behavior fallbacks.
 
 ## Interface Behavior
+
 The Pi supports two interfaces with forward-fallback modes:
 
-- Ethernet (eth0)
-  * Default is DDHCP: uses router-delivered list.
-  * If not receiving IP from router, fallback script sets fixed IP to: 192.168.1.10
-  * Serves DDHCP from pi to LED artnet controller when no other routers or devices present.
+- **Ethernet (eth0)**:
+  - Default is DHCP via router or connected scheme.
+  - If no IP is received, it sets a static IP to: `192.168.1.10`.
+  - Serves DHCP from the Pi to the LED Art-Net controller when no other infrastructure is available.
 
-- Wi-Fi (wlan0)
-  * Attempts to connect to known wi-fi networks using wpa_supplicant-wlan0.conf
-  * If none are available, fallback script sets static IP: 192.168.4.1
-  * Runs with hostapd and dnsmaq for testing.
+- **Wi-Fi (wlan0)**:
+  - Checks with `wpa_supplicant` for known networks using `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`.
+  - If none are available, it sets a static IP: `192.168.4.1`.
+  - Restarts `hostapd` and `dnsmasq` for hotspot mode.
 
 ## Scripts and Services
 
-The system rely on simple, enabled systemds services to ensure fallback coverage without relying on NetworkManager. This is the structure:
+The system relies on simple, enabled systemd services to ensure fallback coverage without relying on NetworkManager.
 
 ### Ethernet Fallback
-- /src/system/eth0-fallback.sh
-- Static IP used: 192.168.1.10/24
-- Dnsmaq conf: /etc/dnsmaq.d/eth0.conf
-- Custom service: /src/system/eth0-fallback.service
 
-Command to make script executable:
+- Script: `/src/system/eth0-fallback.sh`
+- Static IP: `192.168.1.10/24`
+- Dnsmasq Config: `/etc/dnsmasq.d/eth0.conf`
+- Service: `/src/system/eth0-fallback.service`
 
-```
+```sh
 sudo chmod +x /usr/local/bin/eth0-fallback.sh
 sudo systemctl enable eth0-fallback.service
 ```
 
 ### Wi-Fi Fallback
-- /src/system/wlan0-fallback.sh
-- Static IP used: 192.168.4.1/24
-- During fallback, sets up wlan0 with hostapt, dnsmaq wiredup
 
-Config:
-  /etc/hostapd/hostapd.conf
-  /etc/dnsmaq.d/wlan0.conf
-
-Service: /src/system/wlan0-fallback.service
-
-Script with latest checks:
+- Script: `/src/system/wlan0-fallback.sh`
+- Static IP: `192.168.4.1/24`
+- Config Files:
+  - `/etc/hostapd/hostapd.conf`
+  - `/etc/dnsmasq.d/wlan0.conf`
+  - `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`
+- Service: `/src/system/wlan0-fallback.service`
 
 ```sh
-connected=$(ip addr show $wlan0 | grep '"inet " | grep -v "192.168.4")
+sudo chmod +x /usr/local/bin/wlan0-fallback.sh
+sudo systemctl enable wlan0-fallback.service
+```
+
+Sample fallback script logic:
+```sh
+connected=$(ip addr show wlan0 | grep "inet " | grep -v "192.168.4")
 if [ -n "$connected" ]; then
     echo "Wi-Fi is connected. Hotspot not needed."
     exit 0
@@ -54,49 +57,40 @@ fi
 
 echo "No Wi-Fi connection. Enabling hotspot mode."
 
-ip link set $wlan0 down
-ip addr flush dev $wlan0
-ip addr add 192.168.4.1/24 dev $wlan0
-ip link set $wlan0 up
+ip link set wlan0 down
+ip addr flush dev wlan0
+ip addr add 192.168.4.1/24 dev wlan0
+ip link set wlan0 up
 systemctl restart hostapd
-systemctl restart dnsmaq
+systemctl restart dnsmasq
 ```
 
-### Wi-Fi WPE Config
-Configuration for local wi-fi networks is now saved at:
+### Wi-Fi with wpa_supplicant
 
-      /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+- Service: `wpa_supplicant@wlan0`
+- Config: `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`
+- Uses network `priority` to auto-select available options.
 
-__END_NETWORK__
-
-### Wi-Fi Running with wpa_supplicant
-
-- Wpa_supplicant is managed by systemd unit `wpa_supplicant@wlan0`
+Rename default config if needed:
+```sh
+sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 sudo systemctl enable wpa_supplicant@wlan0
-
-- Config file must be named:
-      /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-
-     (symlink from default conf to match with @wlan0 unit)  
-    sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+```
 
 ## GPIO Reserved for Shutdown
-Connect a button between gpio 21 and ground to safely shut down the system
+
+Connect a button between GPIO 21 and ground. In `/boot/config.txt`:
 
 ```sh
-nano /boot/config.txt:
 dtoverlay=gpio-shutdown,gpio_pin=21
 ```
 
-## Safety
-The system will not default switch out of fallback modes during runtime unless manually explicitly set.
+## Additional Services
 
-## Adding Additional Services:
+### 1. Monitor Serial Service
 
-### 1. **Monitor Serial Service**
-Copy to: `/etc/systemd/system/monitor-serial.service`
-
-```
+Path: `/etc/systemd/system/monitor-serial.service`
+```ini
 [Unit]
 Description=LED Table Serial Monitor
 After=multi-user.target
@@ -109,16 +103,14 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ```
-Command to install:
-
-```
+```sh
 sudo systemctl enable monitor-serial.service
 ```
 
-### 2. **Status Server**
-Copy to: `/etc/systemd/system/status-server.service`
+### 2. Status Server
 
-```
+Path: `/etc/systemd/system/status-server.service`
+```ini
 [Unit]
 Description=Status Server
 After=network.target
@@ -131,17 +123,14 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ```
-
-Command to install:
-
-```
+```sh
 sudo systemctl enable status-server.service
 ```
 
-### 3. **Manage Effects**
-Copy to: `/etc/systemd/system/manage_effects.service`
+### 3. Manage Effects
 
-```
+Path: `/etc/systemd/system/manage_effects.service`
+```ini
 [Unit]
 Description=Effect Runner Service
 After=multi-user.target
@@ -154,23 +143,17 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ```
-
-Command to install:
-
-```
+```sh
 sudo systemctl enable manage_effects.service
 ```
 
-### 4. **Wi-Fi & Ethernet Fallbacks**
-- Follow instructions in `Wi-Fi Fallback` and `Ethernet Fallback` sections.
-- These handle the fallback mechanism for network connectivity and DHCP.
+## Fallback Summary
 
-```
+- Both fallback services can be enabled and started via:
+
+```sh
 sudo systemctl enable wlan0-fallback.service
 sudo systemctl enable eth0-fallback.service
-```
-
-```
 sudo systemctl start wlan0-fallback.service
 sudo systemctl start eth0-fallback.service
 ```
