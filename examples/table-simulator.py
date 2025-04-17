@@ -27,6 +27,7 @@ def main():
         tc_led_table.init(config=led_table_config)
 
         led_table_sensor_config = add_sensor_transmit_config(tc_led_table.LedTableConfig())
+        led_table_sensor_config.mqttConfig.clientId = 'pyTableSimulator'
         tc_sensor_transmitter.init(config=led_table_sensor_config)
 
         app = TableSimulator(tc_led_table, tc_sensor_transmitter)
