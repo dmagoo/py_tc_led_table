@@ -42,7 +42,7 @@ class TableController(TableDisplay):
 
     def quit(self):
         super().quit()
-        print("sending shutdown")
+        print("quitting effect")
         self.table_api.reset()
         self.table_api.refresh()
 

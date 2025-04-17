@@ -1,14 +1,17 @@
 #!/bin/bash
 # Wi-Fi fallback for LED Table Pi
-# Triggers if wlan0 does not get a valid IP from wpa_supplicant
-# Starts hotspot mode with static IP 192.168.4.1
+# Triggers hotspot mode if wlan0 does not receive a real IP via DHCP/wpa_supplicant
+# Copy to: /usr/local/bin/wlan0-fallback.sh
 
-sleep 10
+sleep 20  # Give DHCP/wpa_supplicant enough time
 
 IFACE="wlan0"
 
-# Ignore fallback IP (192.168.4.x) if already set
-CONNECTED=$(ip addr show $IFACE | grep "inet " | grep -v "192.168.4")
+# Force DHCP
+sudo dhclient "$IFACE"
+
+# Check for any valid IP except fallback
+CONNECTED=$(ip addr show "$IFACE" | grep "inet " | grep -v "192.168.4")
 
 if [ -n "$CONNECTED" ]; then
     echo "Wi-Fi is connected. Hotspot not needed."
@@ -17,10 +20,10 @@ fi
 
 echo "No Wi-Fi connection. Enabling hotspot mode."
 
-ip link set $IFACE down
-ip addr flush dev $IFACE
-ip addr add 192.168.4.1/24 dev $IFACE
-ip link set $IFACE up
+ip link set "$IFACE" down
+ip addr flush dev "$IFACE"
+ip addr add 192.168.4.1/24 dev "$IFACE"
+ip link set "$IFACE" up
 
 systemctl restart hostapd
 systemctl restart dnsmasq
