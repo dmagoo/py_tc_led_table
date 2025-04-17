@@ -152,8 +152,8 @@ class Snek():
 
 
 
-class ControllerApp(TableController):
-    def __init__(self, table_api):
+class SnekApp(TableController):
+    def __init__(self, table_api, params={}):
         super().__init__(table_api)
         # WIP: self.table_buffer = TableBuffer()
         snek = Snek()
@@ -217,10 +217,10 @@ def main():
     led_table_config = add_sensor_listener_config(led_table_config)
 
     tc_led_table.init(config=led_table_config)
-    app = ControllerApp(tc_led_table)  # Create an instance of the App class
+    app = SnekApp(tc_led_table)  # Create an instance of the App class
 
     # to run without the pygame display:
-    # self.use_display = False
+    self.use_display = False
 
     app.run()  # Start the app's main loop
 

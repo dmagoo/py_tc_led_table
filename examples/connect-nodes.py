@@ -65,7 +65,7 @@ def main():
     app = ControllerApp(tc_led_table)  # Create an instance of the App class
 
     # to run without the pygame display:
-    # self.use_display = False
+    self.use_display = False
 
     app.run()  # Start the app's main loop
 

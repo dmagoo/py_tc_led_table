@@ -24,7 +24,7 @@ from TableController import TableController  # Import the App class from app.py
 NODE_COUNT = 37
 
 class Ripple(TableController):
-    def __init__(self, table_api, params):
+    def __init__(self, table_api, params = {}):
         super().__init__(table_api)
         self.default_ripple_time = 29
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
