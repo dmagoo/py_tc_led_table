@@ -1,4 +1,5 @@
 # src/pygame/models/node.py
+from utils import perceptual_display_color
 
 NODE_COLOR_DEFAULT = (33,33,33)
 
@@ -20,6 +21,7 @@ class Node:
     def colors(self):
         return self._colors
 
+
     @colors.setter
     def colors(self, value):
         # Ensure each color tuple in the list has 4 elements, padding with a default W value if necessary
@@ -29,3 +31,11 @@ class Node:
     @property
     def colors_rgb(self):
         return [color[1:4] for color in self._colors]
+
+    @property
+    def colors_lcd_display(self):
+        """
+        Gamma-encoded RGB colors for screen display.
+        Extracts RGB from internal WRGB tuples and maps each through gamma correction.
+        """
+        return [perceptual_display_color(c[1:4]) for c in self._colors]
