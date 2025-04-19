@@ -33,10 +33,17 @@ from TableController import TableController  # Import the App class from app.py
 
 NODE_COUNT = 37
 
+def get_random_color():
+    return (
+        random.randint(11, 255),
+        random.randint(30, 180),
+        random.randint(0, 120)
+    )
+
 class Ripple(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
-        self.default_ripple_time = 29
+        self.default_ripple_time = 20
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
         self.ripples_per_event = 1.3
 
@@ -44,40 +51,36 @@ class Ripple(TableController):
         self.ripple_brightness = {}
 
         self.max_frame_rate = 60
+        self.color = get_random_color()
 
+        
     def onNodeTouched(self, node_id):
+        """
+        Starts a ripple effect from the touched node and propagates it to nearby nodes.
+        - The touched node gets full brightness and default duration.
+        - Neighbor nodes at levels 1–4 are triggered with increasing delay and decreasing brightness.
+        - If a neighbor is already active, its brightness is boosted (but not lowered).
+        - Timing and brightness scaling per level are defined in a config list for easy future customization.
+        """
         self.ripple_timers[node_id] = self.default_ripple_time
-        l1_neighbor_nodes = self.table_api.getNodeNeighbors(node_id, 1)
-        l2_neighbor_nodes = self.table_api.getNodeNeighbors(node_id, 2)
-        l3_neighbor_nodes = self.table_api.getNodeNeighbors(node_id, 3)
         self.ripple_brightness[node_id] = 1
 
-        for neighbor_node_id in l1_neighbor_nodes:
-            if neighbor_node_id >= 0:
-                if self.ripple_timers.get(neighbor_node_id):
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time
-                    self.ripple_brightness[neighbor_node_id] = max(0.8, self.ripple_brightness[neighbor_node_id])
-                else:
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time
-                    self.ripple_brightness[neighbor_node_id] = 0.8
+        neighbor_ripple_settings = [
+            (1, 1.0, 0.2),
+            (2, 1.3, 0.08),
+            (3, 1.7, 0.01),
+            (4, 2.0, 0.005),
+        ]
 
-        for neighbor_node_id in l2_neighbor_nodes:
-            if neighbor_node_id >= 0:
-                if self.ripple_timers.get(neighbor_node_id):
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * 1.3
-                    self.ripple_brightness[neighbor_node_id] = max(0.7, self.ripple_brightness[neighbor_node_id])
-                else:
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * 1.3
-                    self.ripple_brightness[neighbor_node_id] = 0.6
+        self.color = get_random_color()
 
-        for neighbor_node_id in l3_neighbor_nodes:
-            if neighbor_node_id >= 0:
-                if self.ripple_timers.get(neighbor_node_id):
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * 1.7
-                    self.ripple_brightness[neighbor_node_id] = max(0.3, self.ripple_brightness[neighbor_node_id])
-                else:
-                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * 1.7
-                    self.ripple_brightness[neighbor_node_id] = 0.4
+        
+        for level, time_factor, min_brightness in neighbor_ripple_settings:
+            for neighbor_node_id in self.table_api.getNodeNeighbors(node_id, level):
+                if neighbor_node_id >= 0:
+                    self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * time_factor
+                    old_brightness = self.ripple_brightness.get(neighbor_node_id, 0)
+                    self.ripple_brightness[neighbor_node_id] = max(min_brightness, old_brightness)
 
 
     def doEffectLoop(self):
@@ -92,16 +95,28 @@ class Ripple(TableController):
             elif self.ripple_timers[node_id] > self.default_ripple_time:
                 pass
             else:
-                v1low = 10
-                v1high = 80
+                # base color of the ripple
+                base_r, base_g, base_b = self.color
+                #base_r, base_g, base_b = (244, 40, 0)
+
+                # range of the color as it ripples
+                # allowing a more complex fade
+                amp_r, amp_g, amp_b = (0.78, 0.43, 1.0)
+                # Random amplitude per channel (variation range: ±10% to ±100%)
+                #amp_r = round(random.uniform(0.1, 1.0), 2)
+                #amp_g = round(random.uniform(0.1, 1.0), 2)
+                #amp_b = round(random.uniform(0.1, 1.0), 2)
+
+                v1low = base_r * (1 - amp_r)
+                v1high = base_r * (1 + amp_r)
                 v1range_width = v1high - v1low
 
-                v2low = 80
-                v2high = 200
+                v2low = base_g * (1 - amp_g)
+                v2high = base_g * (1 + amp_g)
                 v2range_width = v2high - v2low
 
-                v3low = 0
-                v3high = 120
+                v3low = base_b * (1 - amp_b)
+                v3high = base_b * (1 + amp_b)
                 v3range_width = v3high - v3low
 
                 t = self.ripple_timers[node_id]
@@ -122,15 +137,13 @@ class Ripple(TableController):
 def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     led_table_config = add_sensor_listener_config(led_table_config)
-
+    print("Calling init from ripple")
     tc_led_table.init(config=led_table_config)
-
+    print("init called, instantiating app")
     app = Ripple(tc_led_table)  # Create an instance of the App class
     app.use_display  = False
-
-
-
+    print("running app")
     app.run()  # Start the app's main loop
-
+    print("app ran")
 if __name__ == "__main__":
     main()
