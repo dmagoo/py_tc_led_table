@@ -8,13 +8,8 @@ Simulate touch events, to send to the api over mqtt
 
 import os
 import sys
-
-script_dir = os.path.dirname(__file__)
-sys.path.append('src')
-sys.path.append('src/pygame')
-sys.path.append('src/artnet')
-sys.path.append('src/config')
-sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
+from bootstrap import apply
+apply()
 
 import tc_led_table, tc_sensor_transmitter
 
