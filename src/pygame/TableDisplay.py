@@ -118,7 +118,7 @@ class TableDisplay:
             pygame.draw.circle(self.screen, RING_BACKGROUND, self.node_positions[node.id], node.radius)  # Example of drawing a node
             pygame.draw.circle(self.screen, node_bg, self.node_positions[node.id], node.radius-self.node_ring_thickness)  # Example of drawing a node
             if node.colors:
-                for i, color in enumerate(node.colors_rgb):
+                for i, color in enumerate(node.colors_lcd_display):
                     pixel_center = (self.node_positions[node.id][0]+int(self.x_positions[i]),self.node_positions[node.id][1]+int(self.y_positions[i]))
                     pygame.draw.circle(self.screen, color, pixel_center, 5)  # Adjust radius as needed
 

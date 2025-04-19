@@ -126,3 +126,15 @@ gamma_b = 2.8  # Gamma value for the blue component
 color = (r, g, b)  # Your RGB color values
 corrected_color = apply_gamma_correction(color, gamma_r, gamma_g, gamma_b)
 """
+
+def perceptual_display_color(color, gamma=2.2):
+    """
+    Simulates NeoPixel brightness on a monitor by applying gamma encoding.
+    This boosts low values to make them visible on screen.
+    Input: (r, g, b) tuple with 0–255 values
+    Output: gamma-encoded (r, g, b) tuple
+    """
+    r = int((color[0] / 255) ** (1 / gamma) * 255)
+    g = int((color[1] / 255) ** (1 / gamma) * 255)
+    b = int((color[2] / 255) ** (1 / gamma) * 255)
+    return (r, g, b)
