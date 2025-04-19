@@ -16,7 +16,7 @@ apply()
 import tc_led_table
 from settings import add_controller_config, add_sensor_listener_config
 from utils import wrgb_tuple_to_int
-from TableController import TableController  # Import the App class from app.py
+from TableController import TableController
 
 NODE_COUNT = 37
 
@@ -124,13 +124,9 @@ class Ripple(TableController):
 def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     led_table_config = add_sensor_listener_config(led_table_config)
-    print("Calling init from ripple")
     tc_led_table.init(config=led_table_config)
-    print("init called, instantiating app")
-    app = Ripple(tc_led_table)  # Create an instance of the App class
+    app = Ripple(tc_led_table)
     app.use_display  = False
-    print("running app")
-    app.run()  # Start the app's main loop
-    print("app ran")
+    app.run()
 if __name__ == "__main__":
     main()
