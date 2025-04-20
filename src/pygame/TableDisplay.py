@@ -31,7 +31,6 @@ class TableDisplay:
         self.current_frame_rate = 0
         self.last_api_refresh = time.time()
         self.last_stats_collection = time.time()
-        self.tick_count = 0
         self.table_api = table_api
         self.setup_table_model()
         self.screen_background_color = SCREEN_BACKGROUND

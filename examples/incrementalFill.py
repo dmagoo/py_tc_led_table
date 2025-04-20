@@ -6,35 +6,37 @@ from settings import add_controller_config, add_sensor_listener_config
 
 from TableController import TableController  # Import the App class from app.py
 from utils import wrgb_tuple_to_int
-from node_geometry import get_row_grouped_node_ids, convert_flat_to_pointy
 NODE_COUNT = 37
-
+PIXELS_PER_NODE = 8
 import time
 
-class Wipe(TableController):
+class IncrementalFill(TableController):
+    """ Dumb effect that fills every node in sequence, one pixel at a time """
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
         self.changed = True
         self.color = wrgb_tuple_to_int((50, 50, 50, 50))
-        self.interval_ms = 50  # time between row fills
+        #self.interval_ms = 50  # time between row fills
+        self.interval_ms = 0
+        self.current_node = 0
+        self.current_pixel = 0
 
-        flat = get_row_grouped_node_ids(table_api, ring_count=4, scan_axis='r')
-        # not fully working yet
-        #pointy = convert_flat_to_pointy(flat)
-        self.wipe_rows = flat
-
-        self.current_row = 0
         self.last_update = time.time() * 1000  # current time in ms
 
     def doEffectLoop(self):
         now = time.time() * 1000  # current time in ms
-        if self.current_row < len(self.wipe_rows):
+
+        if self.current_node < NODE_COUNT:
             if now - self.last_update >= self.interval_ms:
-                for nodeId in self.wipe_rows[self.current_row]:
-                    self.table_api.fillNode(nodeId, self.color)
-                self.current_row += 1
+                self.table_api.setNodePixel(self.current_node, self.current_pixel, self.color)
                 self.last_update = now
                 self.changed = True
+
+                self.current_pixel += 1
+                if self.current_pixel >= PIXELS_PER_NODE:
+                    self.current_pixel = 0
+                    self.current_node += 1
+
 
         if self.changed:
             self.table_api.refresh()
@@ -61,7 +63,7 @@ def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     led_table_config = add_sensor_listener_config(led_table_config)
     tc_led_table.init(config=led_table_config)
-    app = Wipe(tc_led_table)
+    app = IncrementalFill(tc_led_table)
     app.use_display  = False
     app.run()
 if __name__ == "__main__":
