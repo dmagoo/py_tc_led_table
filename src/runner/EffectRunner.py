@@ -1,61 +1,76 @@
+# EffectRunner.py
+# Manages effect execution, switching logic, and status effects
+
 import time
 import threading
 import signal
 import sys
+import json
+from effect_registry import EFFECT_REGISTRY
+
+STATUS_CONFIG_PATH = "status_config.json"
 
 class EffectRunner:
-    def __init__(self, effect_classes, table_api):
-        print("initializing runner")
-        self.effect_classes = effect_classes  # List of effect classes (e.g., [Snek, Ripple])
+    def __init__(self, table_api):
         self.table_api = table_api
-        self.current_effect_index = -1  # Initialize the index
+        self.effect_classes = EFFECT_REGISTRY
+        self.effect_order = [k for k in self.effect_classes if not self.effect_classes[k].get("suppressFromWebUI")]
+        self.current_effect_index = -1
         self.current_effect = None
-        self.running = True
         self.effect_thread = None
+        self.running = True
+        self.status = None
+        self.status_config = self.load_status_config()
+        self.demo_mode = False  # Disable cycling by default
 
-        # Set up signal handler to gracefully stop the script when receiving SIGINT (Ctrl+C)
         signal.signal(signal.SIGINT, self.handle_interrupt)
+        self.set_status("idle", run_effect=True)
 
-        self.switch_effect(self.get_next_effect())  # Start with the first effect
+    def load_status_config(self):
+        try:
+            with open(STATUS_CONFIG_PATH, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}
 
     def stop_current_effect(self):
-        """ Stop the currently running effect gracefully and wait for cleanup """
         if self.current_effect:
-            print("stopping old effect")
-            self.current_effect.stop()  # Stop the current effect
-            self.current_effect.wait_until_done()  # Wait for it to finish cleaning up
+            self.current_effect.stop()
+            self.current_effect.wait_until_done()
 
-    def get_next_effect(self):
-        self.current_effect_index = (self.current_effect_index + 1) % len(self.effect_classes)
-        return self.effect_classes[self.current_effect_index]
+    def get_next_effect_name(self):
+        self.current_effect_index = (self.current_effect_index + 1) % len(self.effect_order)
+        return self.effect_order[self.current_effect_index]
 
-    def switch_effect(self, effect_class=None, params=None):
-        """ Switch to the next effect or stop the current effect if effect_class is None """
-        print("switching effects")
-        if effect_class:
+    def switch_effect(self, effect_name=None, params=None):
+        if effect_name:
+            self.set_status("active", run_effect=False)
             self.stop_current_effect()
+            effect_class = self.effect_classes[effect_name]["class"]
             self.current_effect = effect_class(self.table_api, **(params or {}))
             self.current_effect.use_display = False
-            print("starting new effect")
-            # Run the effect in a separate thread to avoid blocking
             self.effect_thread = threading.Thread(target=self.current_effect.run)
             self.effect_thread.start()
         else:
-            # If effect_class is None, just stop the current effect
             self.stop_current_effect()
 
+    def set_status(self, status_name, run_effect=True):
+        self.status = status_name
+        status_entry = self.status_config.get(status_name)
+        if status_entry and run_effect:
+            self.switch_effect(
+                effect_name=status_entry["effect"],
+                params=status_entry.get("params", {})
+            )
+
     def run(self):
-        print("starting effect runner")
-        """ Start running the effects, switching every 30 seconds by default """
         while self.running:
-            self.switch_effect(self.get_next_effect())  # Switch to the next effect
-            time.sleep(30)  # Wait for 30 seconds before switching again
+            if self.demo_mode:
+                self.switch_effect(self.get_next_effect_name())
+            time.sleep(30)
 
     def handle_interrupt(self, sig, frame):
-        """ Gracefully handle the interrupt (Ctrl+C) and stop the effect runner """
-        print("Interrupt received. Stopping EffectRunner...")
         self.running = False
         if self.effect_thread:
-            self.effect_thread.join()  # Wait for the effect thread to finish cleanly
-        print("EffectRunner stopped.")
-        sys.exit(0)  # Exit cleanly
+            self.effect_thread.join()
+        sys.exit(0)
