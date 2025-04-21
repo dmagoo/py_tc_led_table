@@ -5,9 +5,14 @@ import time
 import os, sys
 from EffectRunner import EffectRunner
 
+import bootstrap_bindings
+from bootstrap_bindings import setup_paths
+setup_paths()
+
+
+
 script_dir = os.path.dirname(__file__)
 sys.path.append('src')
-sys.path.append('examples')
 sys.path.append('src/pygame')
 sys.path.append('src/config')
 sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))

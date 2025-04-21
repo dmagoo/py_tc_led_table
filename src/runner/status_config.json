@@ -2,22 +2,22 @@
     "idle": {
       "effect": "StatusPulse",
       "params": {
-        "color": [0, 50, 0, 10],
-        "speed": 5
+        "color": [0, 0, 160, 0],
+        "speed": 1
       }
     },
     "error": {
       "effect": "StatusPulse",
       "params": {
-        "color": [50, 0, 0, 10],
-        "speed": 5
+          "color": [0, 160, 0, 0],
+        "speed": 1
       }
     },
     "warning": {
       "effect": "StatusPulse",
       "params": {
-        "color": [50, 50, 0, 10],
-        "speed": 5
+        "color": [0, 160, 160, 0],
+        "speed": 1
       }
     }
   }

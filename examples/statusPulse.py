@@ -13,11 +13,14 @@ LEVELS =4
 
 class StatusPulse(TableController):
     """ Dumb effect that fills every node in sequence, one pixel at a time """
-    def __init__(self, table_api, params = {}):
+    def __init__(self, table_api, params={}):
         super().__init__(table_api)
         self.changed = True
-        self.base_color = (0, 250, 0, 20)
-        self.frequency = 0.01
+
+        self.base_color = tuple(params.get("color", [0, 250, 0, 20]))
+        speed = params.get("speed", 1.0)
+        self.frequency = 0.01 * speed  # higher speed = faster pulse
+
         self.phase_offset = math.pi / 2
 
 

@@ -1,5 +1,7 @@
 # effect_registry.py
 # Lives next to EffectRunner. Used by both runner and Flask.
+import sys
+sys.path.append('examples')
 
 from ripple import Ripple
 from snek import SnekApp
