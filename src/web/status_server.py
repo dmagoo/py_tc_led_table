@@ -1,3 +1,6 @@
+# src/web/status_server.py
+# Flask app entry point with status and effects routes
+
 #!/usr/bin/env python3
 
 from flask import Flask, jsonify
@@ -6,6 +9,10 @@ import subprocess
 import os
 
 app = Flask(__name__)
+
+# Register blueprints
+from routes.effects import effects_bp
+app.register_blueprint(effects_bp)
 
 def get_ip(interface):
     try:
@@ -28,11 +35,7 @@ def get_interface_status(interface):
         return "unknown"
 
 def check_serial_monitor():
-    # Use systemctl to check if the service is active
     process_check = os.system("systemctl is-active --quiet monitor-serial.service")
-    return process_check == 0
-
-    process_check = os.system("pgrep -f monitor_serial.py")
     return process_check == 0
 
 @app.route("/status")
