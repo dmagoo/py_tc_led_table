@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>LED Table Control</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
   <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
 </head>
 <body>
   <sl-select id="effect-select" placeholder="Choose an effect"></sl-select>
+  <div id="param-controls" style="margin-top: 1em;"></div>
   <sl-button id="start-button">Start</sl-button>
   <sl-button id="stop-button" variant="danger">Stop</sl-button>
 

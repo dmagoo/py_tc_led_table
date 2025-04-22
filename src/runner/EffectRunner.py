@@ -42,17 +42,20 @@ class EffectRunner:
             with open(STATUS_CONFIG_PATH, "r") as f:
                 return json.load(f)
         except Exception as e:
-            print("bad")
             print(str(e))
             return {}
 
     def handle_effect_start(self, client, userdata, msg):
-        print("EFFECT HANDLER")
-        print(msg)
         try:
-            effect_name = msg.payload.decode()
+            payload = json.loads(msg.payload.decode())
+            effect_name = payload.get("effect")
+            params = payload.get("params", {})
+
             if effect_name in self.effect_classes:
-                self.switch_effect(effect_name)
+                self.switch_effect(effect_name, params=params)
+            else:
+                print(f"Ignored unknown effect: {effect_name}")
+
         except Exception as e:
             print(f"Invalid effect message: {e}")
 
