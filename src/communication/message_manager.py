@@ -5,6 +5,7 @@
 # to the most recent payload and its age in milliseconds.
 # This avoids re-subscribing or re-parsing logic across the app.
 
+import json
 import time
 
 class MessageManager:
@@ -13,14 +14,29 @@ class MessageManager:
         self.latest_messages = {}  # topic -> (payload, timestamp)
 
     def register_topic(self, topic):
-        def handler(msg):
-            self.latest_messages[topic] = (msg.payload.decode(), time.time())
-        self.mqtt_client.register_listener(topic, handler)
-        self.mqtt_client.subscribe(topic)
+        def handler(client, userdata, msg):
+            try:
+                payload = json.loads(msg.payload.decode())
+                self.latest_messages[topic] = (payload, time.time())
+            except Exception as e:
+                print(f"Error handling message on topic {topic}: {e}")
 
-    def get_latest(self, topic):
+        self.mqtt_client.register_listener(topic, handler)
+
+    def publish(self, topic, payload):
+        try:
+            message = json.dumps(payload)
+            self.mqtt_client.publish(topic, message)
+        except Exception as e:
+            print(f"Error publishing to {topic}: {e}")
+
+    def get_latest_message_from_topic(self, topic):
         if topic not in self.latest_messages:
             return None
         payload, timestamp = self.latest_messages[topic]
         age_ms = int((time.time() - timestamp) * 1000)
         return {"payload": payload, "age_ms": age_ms}
+
+    def track_latest_message_from_topic(self, topic):
+        if topic not in self.latest_messages:
+            self.register_topic(topic)

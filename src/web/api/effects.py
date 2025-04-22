@@ -5,6 +5,7 @@ import sys
 from flask import Blueprint, jsonify, request, current_app
 from runner.effect_registry import EFFECT_REGISTRY
 from communication.mqtt_client import publish_message
+from web.decorators import track_latest_message_from_topic
 
 effects_bp = Blueprint("effects", __name__, url_prefix="/api/effects")
 
@@ -31,3 +32,16 @@ def start_effect():
     publish_message(message_manager.mqtt_client, "ledtable/effect/start", effect_name)
 
     return jsonify({"status": "ok", "effect": effect_name})
+
+@effects_bp.route("/status", methods=["GET"])
+@track_latest_message_from_topic("ledtable/effect/status")
+def get_effect_status():
+    message_manager = current_app.config.get("message_manager")
+    if not message_manager:
+        return jsonify({"error": "No message manager"}), 500
+
+    latest = message_manager.get_latest_message_from_topic("ledtable/effect/status")
+    if not latest:
+        return jsonify({"status": "unknown"}), 404
+
+    return jsonify(latest)

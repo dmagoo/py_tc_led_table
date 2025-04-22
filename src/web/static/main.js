@@ -13,15 +13,20 @@ fetch("/api/effects/")
 
 const startButton = document.getElementById("start-button");
 
+
 startButton.addEventListener("click", () => {
   const selectedEffect = effectSelect.value;
   if (!selectedEffect) return;
 
-  fetch("/api/start_effect", {
+  fetch("/api/effects/start", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ effect: selectedEffect })
-  });
+  })
+  .then(res => res.json())
+  .then(data => console.log("Started:", data))
+  .catch(err => console.error("Start error:", err));;
 });
+
