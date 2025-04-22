@@ -1,3 +1,5 @@
+##### DEPRECATED TO BE HANDLED BY SYSTEMD DIRECTLY
+
 #!/bin/bash
 # Copy to: /usr/local/bin/manage_effects.sh
 

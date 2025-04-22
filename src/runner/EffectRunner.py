@@ -12,7 +12,7 @@ from effect_registry import EFFECT_REGISTRY
 STATUS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "status_config.json")
 
 class EffectRunner:
-    def __init__(self, table_api):
+    def __init__(self, table_api, message_manager):
         self.table_api = table_api
         self.effect_classes = EFFECT_REGISTRY
         self.effect_order = [k for k in self.effect_classes if not self.effect_classes[k].get("suppressFromWebUI")]
@@ -21,11 +21,15 @@ class EffectRunner:
         self.effect_thread = None
         self.running = True
         self.status = None
+        self.message_manager = message_manager
         self.status_config = self.load_status_config()
         self.demo_mode = False  # Disable cycling by default
 
         signal.signal(signal.SIGINT, self.handle_interrupt)
         self.set_status("idle", run_effect=True)
+
+        self.message_manager.register_topic("ledtable/effect/start")
+        self.message_manager.mqtt_client.message_callback_add("ledtable/effect/start", self.handle_effect_start)
 
     def load_status_config(self):
         try:
@@ -35,6 +39,16 @@ class EffectRunner:
             print("bad")
             print(str(e))
             return {}
+
+    def handle_effect_start(self, client, userdata, msg):
+        print("EFFECT HANDLER")
+        print(msg)
+        try:
+            effect_name = msg.payload.decode()
+            if effect_name in self.effect_classes:
+                self.switch_effect(effect_name)
+        except Exception as e:
+            print(f"Invalid effect message: {e}")
 
     def stop_current_effect(self):
         if self.current_effect:
@@ -46,13 +60,13 @@ class EffectRunner:
         return self.effect_order[self.current_effect_index]
 
     def switch_effect(self, effect_name=None, params=None):
+        print("SWTICH")
+        print(effect_name)
         if effect_name:
             self.set_status("active", run_effect=False)
             self.stop_current_effect()
             effect_class = self.effect_classes[effect_name]["class"]
-            #self.current_effect = effect_class(self.table_api, **(params or {}))
             self.current_effect = effect_class(self.table_api, params=(params or {}))
-
             self.current_effect.use_display = False
             self.effect_thread = threading.Thread(target=self.current_effect.run)
             self.effect_thread.start()
@@ -62,13 +76,7 @@ class EffectRunner:
     def set_status(self, status_name, run_effect=True):
         self.status = status_name
         status_entry = self.status_config.get(status_name)
-        print("setting status")
-        print(status_name)
-        print(status_entry)
-        print(self.status_config)
         if status_entry and run_effect:
-            print("running effect")
-            print(status_entry["effect"])
             self.switch_effect(
                 effect_name=status_entry["effect"],
                 params=status_entry.get("params", {})

@@ -3,7 +3,7 @@ Description=Effect Runner for LED Table
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/manage_effects.sh
+ExecStart=/home/tcledtable/projects/py_tc_led_table/.venv/bin/python src/runner/manage_effects.py
 WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
 User=tcledtable
 Group=tcledtable

@@ -8,7 +8,6 @@ config_file = 'config.ini'
 if os.path.exists(config_file):
     config.read(config_file)
 
-# Function to get configuration value
 def get_config_value(section, option, env_var_name, default=None):
     env_value = os.getenv(env_var_name)
     if env_value:
@@ -17,10 +16,14 @@ def get_config_value(section, option, env_var_name, default=None):
     if config.has_section(section) and config.has_option(section, option):
         return config.get(section, option)
 
-    if default:
+    if config.has_section("Default") and config.has_option("Default", option):
+        return config.get("Default", option)
+
+    if default is not None:
         return default
 
-    raise ValueError(f"Configuration for {section}.{option} not found in environment variables or config file")
+    raise ValueError(f"Configuration for {section}.{option} not found in environment, section, or [Default]")
+
 
 def add_monitor_config(led_table_config):
     broker_address = get_config_value('MQTT', 'broker_address', 'BROKER_ADDRESS')      

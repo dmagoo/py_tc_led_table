@@ -8,11 +8,10 @@ Description=LED Table Status Server (Flask)
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/tcledtable/projects/py_tc_led_table/src/web/status_server.py
+ExecStart=/home/tcledtable/projects/py_tc_led_table/.venv/bin/python src/web/status_server.py
 WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
 Restart=on-failure
 User=tcledtable
 
 [Install]
 WantedBy=multi-user.target
-

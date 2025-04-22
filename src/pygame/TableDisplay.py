@@ -4,7 +4,7 @@ import pygame.freetype
 import time
 import random
 import math
-import signal
+#import signal
 import numpy as np
 import threading
 
@@ -37,8 +37,8 @@ class TableDisplay:
         self.event_list = []
         #signal.signal(signal.SIGUSR1, self.quit)
         #signal.siginterrupt(signal.SIGUSR1, False)
-        self.original_sigint = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT, self.kill)
+        #self.original_sigint = signal.getsignal(signal.SIGINT)
+        #signal.signal(signal.SIGINT, self.kill)
 
         self._exit_event = threading.Event()  # Added for graceful shutdown
 
@@ -148,7 +148,7 @@ class TableDisplay:
     def kill(self, signum, frame):
         self.running = False
         # restore original handler
-        signal.signal(signal.SIGINT, self.original_sigint)
+        #signal.signal(signal.SIGINT, self.original_sigint)
 
     def run(self):
         if self.use_display:

@@ -2,59 +2,33 @@
 # Flask app entry point with status and effects routes
 
 #!/usr/bin/env python3
+from flask import Flask, jsonify, render_template
+from config.settings import get_config_value
+from communication.mqtt_client import setup_mqtt_client
+from communication.message_manager import MessageManager
 
-from flask import Flask, jsonify
-import socket
-import subprocess
-import os
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
-app = Flask(__name__)
+broker = get_config_value("FlaskApp", "mqtt_broker_address", "MQTT_BROKER_ADDRESS")
+client_id = get_config_value("FlaskApp", "mqtt_client_id", "MQTT_CLIENT_ID")
+
+mqtt_client = setup_mqtt_client(broker_address=broker, client_id=client_id)
+message_manager = MessageManager(mqtt_client)
+
+app.config["message_manager"] = message_manager
+
 
 # Register blueprints
-from routes.effects import effects_bp
+from web.api.effects import effects_bp
 app.register_blueprint(effects_bp)
 
-def get_ip(interface):
-    try:
-        result = subprocess.check_output(
-            ["ip", "-4", "addr", "show", interface],
-            stderr=subprocess.DEVNULL
-        ).decode()
-        for line in result.splitlines():
-            line = line.strip()
-            if line.startswith("inet "):
-                return line.split()[1].split("/")[0]
-    except Exception:
-        return None
+# Register blueprints
+from web.api.status import status_bp
+app.register_blueprint(status_bp)
 
-def get_interface_status(interface):
-    try:
-        output = subprocess.check_output(["cat", f"/sys/class/net/{interface}/operstate"])
-        return output.decode().strip()
-    except Exception:
-        return "unknown"
-
-def check_serial_monitor():
-    process_check = os.system("systemctl is-active --quiet monitor-serial.service")
-    return process_check == 0
-
-@app.route("/status")
-def status():
-    return jsonify({
-        "network": {
-            "eth0": {
-                "ip": get_ip("eth0"),
-                "status": get_interface_status("eth0")
-            },
-            "wlan0": {
-                "ip": get_ip("wlan0"),
-                "status": get_interface_status("wlan0")
-            }
-        },
-        "serial_monitor": {
-            "status": "running" if check_serial_monitor() else "not running"
-        }
-    })
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

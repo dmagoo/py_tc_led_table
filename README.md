@@ -6,9 +6,15 @@ Windows:
 .\.venv\Scripts\activate
 pip install -r requirements.txt
 
+
 Mac / Linux
 source .venv/bin/activate
 pip install -r requirements.txt
+
+Add path to venv:
+echo "/home/tcledtable/projects/py_tc_led_table/src" > .venv/lib/python3.11/site-packages/project_paths.pth
+echo "/home/tcledtable/projects/py_tc_led_table/examples" >> .venv/lib/python3.11/site-packages/project_paths.pth
+
 
 update config.ini to include mqtt broker ip address, if needed
 
