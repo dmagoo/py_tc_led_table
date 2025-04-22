@@ -31,13 +31,12 @@ def get_random_color():
 class TestNode(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
-        self.max_frame_rate = 60
-        self.color = get_random_color()
+        self.color = tuple(params.get("color", get_random_color()))
         self.node_states = {}
         
     def onNodeTouched(self, node_id):
         if self.node_states.get(node_id) is None:
-            self.node_states[node_id] = get_random_color()
+            self.node_states[node_id] = self.color #get_random_color()
         else:
             self.node_states[node_id] = None
 

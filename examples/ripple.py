@@ -30,15 +30,14 @@ def get_random_color():
 class Ripple(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
-        self.default_ripple_time = 20
+        self.default_ripple_time = params.get("speed", 20)
+        self.color = tuple(params.get("color", get_random_color()))
+
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
         self.ripples_per_event = 1.3
 
         self.ripple_timers = {}
         self.ripple_brightness = {}
-
-        self.max_frame_rate = 60
-        self.color = get_random_color()
 
         
     def onNodeTouched(self, node_id):
@@ -59,8 +58,7 @@ class Ripple(TableController):
             (4, 2.0, 0.005),
         ]
 
-        self.color = get_random_color()
-
+        # self.color = get_random_color()
         
         for level, time_factor, min_brightness in neighbor_ripple_settings:
             for neighbor_node_id in self.table_api.getNodeNeighbors(node_id, level):

@@ -19,12 +19,14 @@ from TableController import TableController  # Import the App class from app.py
 
 NODE_COUNT = 37
 
-class ControllerApp(TableController):
-    def __init__(self, table_api):
+class ConnectNodes(TableController):
+    def __init__(self, table_api, params = {}):
         super().__init__(table_api)
         self.test_node_a = -1
         self.test_node_b = -1
-
+        color = tuple(params.get("color",  (100,200,100)))
+        w,r,g,b = color
+        self.color = (r,g,b)
     def doEffectLoop(self):
         self.test_node_a = -1
         self.test_node_b = -1
@@ -43,7 +45,7 @@ class ControllerApp(TableController):
                 else:
                     (pixel_facing_start, pixelB) =  self.table_api.getFacingPixelIndexes(current_node,  self.test_node_a)
                     (pixel_facing_end, pixelB) =  self.table_api.getFacingPixelIndexes(current_node,  self.test_node_b)
-                    fill = fill_between(8, pixel_facing_start, pixel_facing_end, (100,200,100), direction = 'clockwise' if path_index % 2 == 0 else 'counter_clockwise')
+                    fill = fill_between(8, pixel_facing_start, pixel_facing_end, self.color, direction = 'clockwise' if path_index % 2 == 0 else 'counter_clockwise')
                     self.table_api.fillNode(current_node, fill.astype(int).tolist(), 0)
                 last_node = current_node
             else:
@@ -59,7 +61,7 @@ def main():
     led_table_config = add_sensor_listener_config(led_table_config)
 
     tc_led_table.init(config=led_table_config)
-    app = ControllerApp(tc_led_table)  # Create an instance of the App class
+    app = ConnectNodes(tc_led_table)  # Create an instance of the App class
 
     # to run without the pygame display:
     app.use_display = False

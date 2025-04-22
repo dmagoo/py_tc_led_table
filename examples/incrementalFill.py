@@ -1,3 +1,4 @@
+import random
 from bootstrap import apply
 apply()
 
@@ -10,18 +11,31 @@ NODE_COUNT = 37
 PIXELS_PER_NODE = 8
 import time
 
+def get_random_color():
+    return (
+        random.randint(11, 100),
+        random.randint(30, 180),
+        random.randint(0, 120),
+        random.randint(0, 120)
+    )
+
 class IncrementalFill(TableController):
     """ Dumb effect that fills every node in sequence, one pixel at a time """
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
-        self.changed = True
-        self.color = wrgb_tuple_to_int((50, 50, 50, 50))
+        self.color = wrgb_tuple_to_int(tuple(params.get("color", get_random_color())))
         #self.interval_ms = 50  # time between row fills
-        self.interval_ms = 0
+        speed = params.get("speed", 20)
+        if speed == 0:
+            self.interval_ms = 200
+        else:
+            self.interval_ms = 100 / speed
+
         self.current_node = 0
         self.current_pixel = 0
 
         self.last_update = time.time() * 1000  # current time in ms
+        self.changed = True
 
     def doEffectLoop(self):
         now = time.time() * 1000  # current time in ms

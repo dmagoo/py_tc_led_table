@@ -15,8 +15,13 @@ class Wipe(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
         self.changed = True
-        self.color = wrgb_tuple_to_int((50, 50, 50, 50))
-        self.interval_ms = 50  # time between row fills
+        self.color = wrgb_tuple_to_int(tuple(params.get("color", (50,50,50,50))))
+        speed = params.get("speed", 20)
+        if speed == 0:
+            self.interval_ms = 200
+        else:
+            self.interval_ms = 100 / speed
+
 
         flat = get_row_grouped_node_ids(table_api, ring_count=4, scan_axis='r')
         # not fully working yet

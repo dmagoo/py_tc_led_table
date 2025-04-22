@@ -6,8 +6,28 @@ sys.path.append('examples')
 from ripple import Ripple
 from snek import SnekApp
 from statusPulse import StatusPulse
+from incrementalFill import IncrementalFill
+from wipe import Wipe
+from testNode import TestNode
+from connectNodes import ConnectNodes
 
 EFFECT_REGISTRY = {
+    "StatusPulse": {
+        "class": StatusPulse,
+        "params": {
+            "speed": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.1,
+                "max": 5.0,
+                "widget": "slider"
+            },
+            "color": {
+                "type": "color",
+                "default": [10, 10, 20, 100]
+            }
+        }
+    },
     "Ripple": {
         "class": Ripple,
         "params": {
@@ -20,7 +40,7 @@ EFFECT_REGISTRY = {
             },
             "color": {
                 "type": "color",
-                "default": [255, 0, 0, 0]
+                "default": [0, 66, 11, 77]
             }
         }
     },
@@ -41,8 +61,17 @@ EFFECT_REGISTRY = {
             }
         }
     },
-    "StatusPulse": {
-        "class": StatusPulse,
+    "ConnectNodes": {
+        "class": ConnectNodes,
+        "params": {
+            "color": {
+                "type": "color",
+                "default": [10, 100, 10, 100]
+            }
+        }
+    },
+    "Fill": {
+        "class": IncrementalFill,
         "params": {
             "speed": {
                 "type": "float",
@@ -53,9 +82,33 @@ EFFECT_REGISTRY = {
             },
             "color": {
                 "type": "color",
-                "default": [255, 0, 0, 0]
+                "default": [0, 66, 11, 77]
             }
         }
     },
-
+    "Wipe": {
+        "class": Wipe,
+        "params": {
+            "speed": {
+                "type": "float",
+                "default": 1.0,
+                "min": 0.1,
+                "max": 5.0,
+                "widget": "slider"
+            },
+            "color": {
+                "type": "color",
+                "default": [0, 66, 11, 77]
+            }
+        }
+    },
+    "TouchTest": {
+        "class": TestNode,
+        "params": {
+            "color": {
+                "type": "color",
+                "default": [10, 100, 10, 100]
+            }
+        }
+    }
 }
