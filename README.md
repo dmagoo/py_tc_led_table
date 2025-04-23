@@ -27,3 +27,25 @@ cmake ..
 #cmake build . --config Release
 cmake --build . --config Release  --target tc_led_table # to control the table
 cmake --build . --config Release  --target tc_sensor_transmitter # to send sensor data to the controller
+
+
+#### MQTT Messages
+"ledtable/sensor/touch"
+touch topic: this uses a very compressed data packet via nanopb
+likely something we can iterate away from, as touches are pretty
+infrequent
+
+SensorEventData {
+  event_type: touch_event / periodic
+    sensor_data {
+      node_id
+      touched // bool
+      // deprecated props, for analog sensors
+      current_value // value of analog sensor deprecated
+      threshold_off // this or lower is "off"
+      threshold_on// this or higher is "on"
+}
+}
+
+#all cluster commands are deprecated. we no longer us MQTT / nanopb for pixel data
+# this all now gos out over artnet, and not to the cluster controllers

@@ -81,7 +81,7 @@ class Ripple(TableController):
                 pass
             else:
                 # base color of the ripple
-                base_r, base_g, base_b = self.color
+                base_w, base_r, base_g, base_b = self.color
                 #base_r, base_g, base_b = (244, 40, 0)
 
                 # range of the color as it ripples
