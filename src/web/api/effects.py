@@ -40,6 +40,15 @@ def start_effect():
 
     return jsonify({"status": "ok", "effect": effect_name})
 
+@effects_bp.route("/stop", methods=["POST"])
+def stop_effect():
+    message_manager = current_app.config["message_manager"]
+    payload = {}
+
+    publish_message(message_manager.mqtt_client, "ledtable/effect/stop", json.dumps(payload))
+
+    return jsonify({"status": "ok"})
+
 @effects_bp.route("/status", methods=["GET"])
 @track_latest_message_from_topic("ledtable/effect/status")
 def get_effect_status():

@@ -36,6 +36,8 @@ class EffectRunner:
 
         self.message_manager.register_topic("ledtable/effect/start")
         self.message_manager.mqtt_client.message_callback_add("ledtable/effect/start", self.handle_effect_start)
+        self.message_manager.register_topic("ledtable/effect/stop")
+        self.message_manager.mqtt_client.message_callback_add("ledtable/effect/stop", self.handle_effect_stop)
 
     def load_status_config(self):
         try:
@@ -58,6 +60,10 @@ class EffectRunner:
 
         except Exception as e:
             print(f"Invalid effect message: {e}")
+            
+    def handle_effect_stop(self, client, userdata, msg):
+        self.stop_current_effect()
+
 
     def stop_current_effect(self):
         if self.current_effect:

@@ -3,6 +3,7 @@ import { renderParamControls } from './paramRenderer.js';
 const effectSelect = document.getElementById("effect-select");
 const paramControls = document.getElementById("param-controls");
 const startButton = document.getElementById("start-button");
+const stopButton = document.getElementById("stop-button");
 
 let effects = {};
 
@@ -55,6 +56,21 @@ startButton.addEventListener("click", () => {
   .then(res => res.json())
   .then(data => console.log("Started:", data))
   .catch(err => console.error("Start error:", err));
+});
+
+stopButton.addEventListener("click", () => {
+  const paramData = {};
+
+  fetch("/api/effects/stop", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(paramData)
+  })
+  .then(res => res.json())
+  .then(data => console.log("Stopped"))
+  .catch(err => console.error("Stop error:", err));
 });
 
 function hexToRgbaArray(hex) {
