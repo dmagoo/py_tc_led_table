@@ -33,9 +33,16 @@ EFFECT_REGISTRY = {
         "params": {
             "speed": {
                 "type": "float",
-                "default": 1.0,
+                "default": 10,
                 "min": 0.1,
                 "max": 5.0,
+                "widget": "slider"
+            },
+            "reach": {
+                "type": "float",
+                "default": 3,
+                "min": 1.0,
+                "max": 7,
                 "widget": "slider"
             },
             "color": {

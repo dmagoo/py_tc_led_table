@@ -32,35 +32,38 @@ class Ripple(TableController):
         super().__init__(table_api)
         self.default_ripple_time = params.get("speed", 20)
         self.color = tuple(params.get("color", get_random_color()))
-
+        self.reach = params.get("reach", 4)
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
         self.ripples_per_event = 1.3
 
         self.ripple_timers = {}
         self.ripple_brightness = {}
 
-        
     def onNodeTouched(self, node_id):
         """
-        Starts a ripple effect from the touched node and propagates it to nearby nodes.
-        - The touched node gets full brightness and default duration.
-        - Neighbor nodes at levels 1–4 are triggered with increasing delay and decreasing brightness.
-        - If a neighbor is already active, its brightness is boosted (but not lowered).
-        - Timing and brightness scaling per level are defined in a config list for easy future customization.
-        """
+            Starts a ripple effect from the touched node and propagates it to nearby nodes.
+            - The touched node gets full brightness and default duration.
+            - Neighbor nodes at increasing levels are triggered with increasing delay and decreasing brightness.
+            - If a neighbor is already active, its brightness is boosted (but not lowered).
+            - Timing and brightness scaling per level are defined in a config list for easy future customization.
+            """
         self.ripple_timers[node_id] = self.default_ripple_time
         self.ripple_brightness[node_id] = 1
 
         neighbor_ripple_settings = [
-            (1, 1.0, 0.2),
-            (2, 1.3, 0.08),
-            (3, 1.7, 0.01),
-            (4, 2.0, 0.005),
+            (1.0, 0.2),
+            (1.3, 0.08),
+            (1.7, 0.01),
+            (2.0, 0.005),
+            (2.3, 0.004),
+            (2.6, 0.003),
+            (4.0, 0.002)
         ]
 
-        # self.color = get_random_color()
-        
-        for level, time_factor, min_brightness in neighbor_ripple_settings:
+        for level, (time_factor, min_brightness) in enumerate(neighbor_ripple_settings, start=1):
+            if level > self.reach:
+                break
+
             for neighbor_node_id in self.table_api.getNodeNeighbors(node_id, level):
                 if neighbor_node_id >= 0:
                     self.ripple_timers[neighbor_node_id] = self.neighbor_ripple_time * time_factor
