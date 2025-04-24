@@ -73,6 +73,48 @@ stopButton.addEventListener("click", () => {
   .catch(err => console.error("Stop error:", err));
 });
 
+const serviceList = document.getElementById("service-list");
+
+fetch("/api/services/")
+  .then(res => res.json())
+  .then(services => {
+    services.forEach(service => {
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "flex";
+      wrapper.style.alignItems = "center";
+      wrapper.style.gap = "1em";
+
+      const label = document.createElement("span");
+      label.textContent = `${service.label} (${service.name})`;
+
+      const status = document.createElement("sl-badge");
+      status.variant = service.status === "active" ? "success" : "neutral";
+      status.textContent = service.status;
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(status);
+
+      if (service.controllable) {
+        ["start", "stop", "restart"].forEach(action => {
+          const btn = document.createElement("sl-button");
+          btn.textContent = action;
+          btn.size = "small";
+          btn.addEventListener("click", () => {
+            fetch(`/api/services/${service.name}/${action}`, { method: "POST" })
+              .then(res => res.json())
+              .then(data => console.log(`${action} result:`, data))
+              .catch(err => console.error(`${action} error:`, err));
+          });
+          wrapper.appendChild(btn);
+        });
+      }
+
+      serviceList.appendChild(wrapper);
+    });
+  });
+
+
+
 function hexToRgbaArray(hex) {
   const bigint = parseInt(hex.replace('#', ''), 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255, 0];

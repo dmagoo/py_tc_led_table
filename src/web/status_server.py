@@ -19,10 +19,12 @@ app.config["message_manager"] = message_manager
 
 
 # Register blueprints
+from web.api.services import services_bp
+app.register_blueprint(services_bp)
+
 from web.api.effects import effects_bp
 app.register_blueprint(effects_bp)
 
-# Register blueprints
 from web.api.status import status_bp
 app.register_blueprint(status_bp)
 
