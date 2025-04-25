@@ -11,7 +11,7 @@ import random
 script_dir = os.path.dirname(__file__)
 sys.path.append('src')
 sys.path.append('src/pygame')
-sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
+sys.path.append(os.path.abspath('cpplib/python_bindings/Release'))
 
 import tc_led_table
 from utils import int_to_wrgb_tuple

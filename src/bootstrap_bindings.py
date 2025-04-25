@@ -4,7 +4,7 @@ import platform
 
 def setup_paths():
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    bindings_dir = os.path.join(project_root, "lib", "tc_led_table", "python_bindings")
+    bindings_dir = os.path.join(project_root, "cpplib", "python_bindings")
     if platform.system() == "Windows":
         bindings_dir = os.path.join(bindings_dir, "Release")
 
