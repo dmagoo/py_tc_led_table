@@ -3,7 +3,7 @@ from bootstrap import apply
 apply()
 
 import tc_led_table
-from settings import add_controller_config, add_sensor_listener_config
+from settings import add_controller_config
 
 from TableController import TableController  # Import the App class from app.py
 from utils import wrgb_tuple_to_int
