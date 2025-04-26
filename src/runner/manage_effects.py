@@ -16,13 +16,12 @@ sys.path.append('src/config')
 sys.path.append(os.path.abspath('cpplib/python_bindings/Release'))
 
 import tc_led_table
-from settings import add_controller_config, add_sensor_listener_config, get_config_value
+from settings import add_controller_config, get_config_value
 from communication.mqtt_client import setup_mqtt_client
 from communication.message_manager import MessageManager
 
 def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
-    led_table_config = add_sensor_listener_config(led_table_config)
     tc_led_table.init(config=led_table_config)
 
     broker = get_config_value("EffectRunner", "mqtt_broker_address", "MQTT_BROKER_ADDRESS")
