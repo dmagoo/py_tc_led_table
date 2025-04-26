@@ -1,5 +1,4 @@
 #include "LedTableApi.h"
-#include "core/ClusterMessage.h"
 #include "core/node_geometry.h"
 #include <iostream>
 
@@ -103,10 +102,6 @@ void LedTableApi::performClusterOperationReturningVoid(int nodeId, Args... args)
         }
         //// HERE the seond argument is fine!!  Is the syntax below correct?
         CommandType command(nodeId, args...);
-        // run the command against the local model
-        if (!suppressMessages && clusterMessageManager != nullptr) {
-            clusterMessageManager->sendClusterCommand(clusterId, command);
-        }
         command.execute(cluster);
     } else {
         // Handle the case where the cluster is not found
@@ -121,9 +116,6 @@ WRGB LedTableApi::performClusterOperationReturningColor(int nodeId, Args... args
     if (clusterPtr) {
         Cluster &cluster = *const_cast<Cluster *>(clusterPtr); // Cast to non-const reference
         CommandType command(nodeId, args...);
-        if (!suppressMessages && clusterMessageManager != nullptr) {
-            clusterMessageManager->sendClusterCommand(clusterId, command);
-        }
         return command.execute(cluster);
     } else {
         // Handle the case where the cluster is not found
@@ -132,35 +124,7 @@ WRGB LedTableApi::performClusterOperationReturningColor(int nodeId, Args... args
 }
 
 LedTableApi::LedTableApi(ClusterManager &clusterManager, const LedTableConfig &config)
-    : clusterManager(clusterManager), suppressMessages(!config.enableMQTTMessaging), artnetClient(nullptr, artnet_deleter) {
-
-    if (config.enableMQTTMessaging || config.enableArtnetMessaging) {
-        clusterMessageManager = std::make_unique<ClusterMessageManager>(config);
-    } else {
-        clusterMessageManager = nullptr; // Explicitly set to nullptr when omitted
-    }
-
-    // Initialize SensorListener if MQTT subscriptions are enabled
-    if (config.enableMQTTSubscriptions) {
-        sensorListener = std::make_unique<SensorListener>(config);
-        sensorListener->setTouchSensorDataCallback([this](int nodeId, int sensorValue, bool touched) {
-            int clusterId = this->clusterManager.getClusterIdFromNodeId(nodeId);
-            const Cluster *clusterPtr = this->clusterManager.getClusterById(clusterId);
-            if (clusterPtr != nullptr) {
-                Cluster &cluster = *const_cast<Cluster *>(clusterPtr); // Cast to non-const reference
-                bool touchResult = cluster.setNodeTouchValue(nodeId, sensorValue);
-
-                if (touchResult != touched) {
-                    std::cerr << "touch state mismatch for node: " << nodeId << std::endl;
-                }
-            } else {
-                // todo: throw error?
-            }
-        });
-
-    } else {
-        sensorListener = nullptr; // Explicitly set to nullptr when omitted
-    }
+    : clusterManager(clusterManager), suppressMessages(!config.enableArtnetMessaging), artnetClient(nullptr, artnet_deleter) {
 
     if (config.enableArtnetMessaging) {
       //std::cerr << "has ip!: " << config.artnetConfig.brokerAddress.c_str() << std::endl;
@@ -392,48 +356,14 @@ std::tuple<int, int> LedTableApi::getFacingPixelIndexes(CubeCoordinate coordinat
     return getFacingPixelIndexes(nodeIdA, nodeIdB);
 }
 
-bool LedTableApi::getTouchState(int nodeId) {
-    int clusterId = clusterManager.getClusterIdFromNodeId(nodeId);
-    const Cluster *clusterPtr = clusterManager.getClusterById(clusterId);
-    return clusterPtr->getTouchState(nodeId);
-}
-bool LedTableApi::getTouchState(RingCoordinate coordinate) {
-    int nodeId = convertToNodeId(coordinate);
-    return getTouchState(nodeId);
-}
-
-bool LedTableApi::getTouchState(Cartesian2dCoordinate coordinate) {
-    int nodeId = convertToNodeId(coordinate);
-    return getTouchState(nodeId);
-}
-bool LedTableApi::getTouchState(CubeCoordinate coordinate) {
-    int nodeId = convertToNodeId(coordinate);
-    return getTouchState(nodeId);
-}
-
 void LedTableApi::setSuppressMessages(bool newValue) {
     suppressMessages = newValue;
 }
 
-std::vector<int> LedTableApi::getAllTouchedNodeIds() {
-    std::vector<int> allTouchedNodeIds;
-    clusterManager.forEachCluster([&allTouchedNodeIds](Cluster &cluster) { // Capture allTouchedNodeIds by reference
-        auto touchedNodeIds = cluster.getTouchedNodeIds();
-        allTouchedNodeIds.insert(allTouchedNodeIds.end(), touchedNodeIds.begin(), touchedNodeIds.end());
-    });
-    return allTouchedNodeIds;
-}
-
 // ignores suppressMessges, as this is an explicit command to send a message
-// but cannot operate if a clustermessagemanager is not present
 void LedTableApi::refresh() {
     clusterManager.forEachCluster([this](Cluster &cluster) { // Capture `this` to access class members
-        std::vector<WRGB> buffer = cluster.getPixelBuffer();
-        if (this->clusterMessageManager != nullptr) { // Use `this->` to access class members
-            BlitBufferCommand command(buffer, 0x00000000);
-            this->clusterMessageManager->sendClusterCommand(cluster.getId(), command);
-            this->sendClusterArtnet(cluster.getId(), cluster.getPixelBuffer());
-        }
+        this->sendClusterArtnet(cluster.getId(), cluster.getPixelBuffer());
     });
 }
 
@@ -442,10 +372,7 @@ void LedTableApi::reset() {
         FillBufferCommand command(0x00000000);
         command.execute(cluster);
         if (!suppressMessages) {
-            if (this->clusterMessageManager != nullptr) { // Use `this->` to access class members
-                this->clusterMessageManager->sendClusterCommand(cluster.getId(), command);
-                this->sendClusterArtnet(cluster.getId(), cluster.getPixelBuffer());
-            }
+          this->sendClusterArtnet(cluster.getId(), cluster.getPixelBuffer());
         }
     });
 }

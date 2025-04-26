@@ -2,8 +2,7 @@
 This example file shows how to create an TCTable simulator
 It uses python bindings to the table api update the local model,
 But uses a local artnet implementation to receive the pixel data
-From the controller. It also uses the Sensor Transmitter bindings to
-Simulate touch events, to send to the api over mqtt
+From the controller.
 """
 
 import os
@@ -11,7 +10,7 @@ import sys
 from bootstrap import apply
 apply()
 
-import tc_led_table, tc_sensor_transmitter
+import tc_led_table
 
 from settings import add_monitor_config, get_config_value
 from TableSimulator import TableSimulator

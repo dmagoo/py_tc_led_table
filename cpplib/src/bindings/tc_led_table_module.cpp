@@ -4,9 +4,7 @@
 #include "LedTableApi.h"
 #include "config/led_table_config.h"
 #include "config/make_cluster_config.h"
-// #include "config/make_mqtt_config.h"
 #include "core/ClusterManager.h"
-#include "core/ClusterMessageManager.h"
 
 namespace py = pybind11;
 
@@ -36,10 +34,6 @@ std::shared_ptr<LedTableApi> init(LedTableConfig *config = nullptr) {
     //effectiveConfig.artnetConfig.brokerAddress = "192.168.1.50";
   } else {
     effectiveConfig.artnetConfig.brokerAddress = "192.168.1.50";
-    // Default configuration
-    effectiveConfig.mqttConfig.brokerAddress = "tcp://localhost";
-    effectiveConfig.enableMQTTMessaging = true;
-      // Set defaults for other configs as needed
   }
 
   apiSharedPtr = std::make_shared<LedTableApi>(clusterManager, effectiveConfig);
@@ -260,29 +254,6 @@ PYBIND11_MODULE(tc_led_table, m) {
         return api->getFacingPixelIndexes(coordinateA, coordinateB);
     });
 
-
-    // getTouchState methods
-    m.def("getTouchState", [](int nodeId) -> bool {
-        auto api = init();
-        return api->getTouchState(nodeId);
-    });
-    m.def("getTouchState", [](const RingCoordinate &coordinate) -> bool {
-        auto api = init();
-        return api->getTouchState(coordinate);
-    });
-    m.def("getTouchState", [](const Cartesian2dCoordinate &coordinate) -> bool {
-        auto api = init();
-        return api->getTouchState(coordinate);
-    });
-    m.def("getTouchState", [](const CubeCoordinate &coordinate) -> bool {
-        auto api = init();
-        return api->getTouchState(coordinate);
-    });
-
-    m.def("getAllTouchedNodeIds", []() -> std::vector<int> {
-        auto api = init();
-        return api->getAllTouchedNodeIds();
-    });
 
     m.def("reset", []() {
         auto api = init();
