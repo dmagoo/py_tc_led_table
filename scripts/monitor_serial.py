@@ -12,35 +12,16 @@ import time
 
 script_dir = os.path.dirname(__file__)
 sys.path.append('src')
-sys.path.append('src/pygame')
 sys.path.append('src/config')
-sys.path.append(os.path.abspath('lib/tc_led_table/python_bindings/Release'))
+sys.path.append('src/communication')
 
-
-import platform
-
-bindings_dir = 'lib/tc_led_table/python_bindings'
-if platform.system() == 'Windows':
-    bindings_dir = os.path.join(bindings_dir, 'Release')
-
-sys.path.append(os.path.abspath(bindings_dir))
-
-import tc_led_table, tc_sensor_transmitter
-from settings import add_sensor_transmit_config, add_monitor_config
-
+from communication.mqtt_client import setup_mqtt_client, publish_object
+from communication.message_manager import MessageManager
+from settings import get_config_value
 
 EXPECTED_CLUSTER_COUNT = 4
 active_cluster_ids = set()
 unconfigured_ports = []
-
-led_table_config = add_monitor_config(tc_led_table.LedTableConfig())
-tc_led_table.init(config=led_table_config)
-sensor_config = add_sensor_transmit_config(tc_led_table.LedTableConfig())
-
-sensor_config.mqttConfig.clientId = 'pySerialMonitor'
-tc_sensor_transmitter.init(config=sensor_config)
-
-sensor_api = tc_sensor_transmitter
 
 def build_config(cluster_id):
     return json.dumps({
@@ -50,7 +31,7 @@ def build_config(cluster_id):
         ]
     })
 
-def handle_message(port_path, line):
+def handle_message(port_path, line, mqtt_client):
     try:
         data = json.loads(line)
         event = data.get("eventType")
@@ -77,51 +58,47 @@ def handle_message(port_path, line):
                     active_cluster_ids.add(cluster_id)
                     print(f"Device on {port_path} confirmed with clusterId {cluster_id}")
 
-        elif event == "touch_event":  # or event == "periodic_touch_status":
-            print(data)
+        elif event == "touch_event":
             for item in data.get("sensorData", []):
                 node_id = item["nodeId"]
                 touched = item["touched"]
                 value = 100 if touched else 0
-                sensor_api.sendTouchSensorEvent(node_id, value, touched)
+                publish_object(mqtt_client, "ledtable/sensor/touch_event", item)
+
     except Exception as e:
         print(f"[ERROR] Failed to handle message from {port_path}: {e}")
 
 def get_connected_devices():
-    # List all connected serial devices
     ports = serial.tools.list_ports.comports()
-    connected_devices = []
-    
-    for port in ports:
-        connected_devices.append(port.device)
-    
+    connected_devices = [port.device for port in ports]
     return connected_devices
 
-def monitor_device(port_path):
+def monitor_device(port_path, mqtt_client):
     try:
         with serial.Serial(port_path, 115200, timeout=1) as ser:
             while True:
                 line = ser.readline().decode('utf-8').strip()
                 if line:
-                    handle_message(port_path, line)
+                    handle_message(port_path, line, mqtt_client)
     except Exception as e:
         print(f"[ERROR] Monitoring failed for {port_path}: {e}")
 
 def monitor_all_devices():
-    # Monitor all connected devices and report status
+    broker = get_config_value("SerialMonitor", "mqtt_broker_address", "MQTT_BROKER_ADDRESS")
+    client_id = get_config_value("SerialMonitor", "mqtt_client_id", "MQTT_CLIENT_ID")
+    mqtt_client = setup_mqtt_client(broker_address=broker, client_id=client_id)
+
     connected_devices = get_connected_devices()
     if len(connected_devices) == 0:
         print("[ERROR] No devices connected.")
     else:
         print(f"Connected devices: {connected_devices}")
-        # Start monitoring the devices in separate threads
         threads = []
         for port in connected_devices:
-            t = threading.Thread(target=monitor_device, args=(port,))
+            t = threading.Thread(target=monitor_device, args=(port, mqtt_client))
             t.daemon = True
             t.start()
             threads.append(t)
-        # Keep the main thread alive
         while True:
             time.sleep(60)
 

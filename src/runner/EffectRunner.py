@@ -39,6 +39,30 @@ class EffectRunner:
         self.message_manager.register_topic("ledtable/effect/stop")
         self.message_manager.mqtt_client.message_callback_add("ledtable/effect/stop", self.handle_effect_stop)
 
+        self.last_touch_times = {}  # (nodeId, touched) -> timestamp
+        self.debounce_interval = 0.1  # seconds
+        # not needed because we are not saving last-messages for later retrieval
+        #self.message_manager.register_topic("ledtable/sensor/touch_event")
+        self.message_manager.mqtt_client.register_listener("ledtable/sensor/touch_event", self.handle_touch_message)
+        # self.message_manager.mqtt_client.message_callback_add("ledtable/sensor/touch_event", self.handle_touch_message)
+
+    def handle_touch_message(self, client, userdata, msg):
+        try:
+            payload = json.loads(msg.payload.decode())
+            node_id = payload["nodeId"]
+            touched = payload["touched"]
+            now = time.time()
+            key = (node_id, touched)
+            last_time = self.last_touch_times.get(key, 0)
+            if (now - last_time) >= self.debounce_interval:
+                self.last_touch_times[key] = now
+                if self.current_effect and hasattr(self.current_effect, "handle_touch_event"):
+                    self.current_effect.handle_touch_event(node_id, touched)
+
+        except Exception as e:
+            print(f"Error handling touch message: {e}", flush=True)
+            sys.exit(0)
+
     def load_status_config(self):
         try:
             with open(STATUS_CONFIG_PATH, "r") as f:
@@ -75,8 +99,7 @@ class EffectRunner:
         return self.effect_order[self.current_effect_index]
 
     def switch_effect(self, effect_name=None, params=None):
-        print("SWTICH")
-        print(effect_name)
+        print("Switching effect", effect_name)
         if effect_name:
             self.set_status("active", run_effect=False)
             self.stop_current_effect()

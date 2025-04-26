@@ -60,7 +60,21 @@ class TableController(TableDisplay):
         buffer = self.table_api.getNodePixelBuffer(node_id)
         self.table.nodes[node_id].colors = [int_to_wrgb_tuple(wrgb_int) for wrgb_int in buffer]
 
+
+    def handle_touch_event(self, node_id, touched):
+        print(node_id)
+        if touched:
+            if node_id not in self.touched_node_ids:
+                self.touched_node_ids.insert(0, node_id)
+                self.onNodeTouched(node_id)
+        else:
+            if node_id in self.touched_node_ids:
+                self.touched_node_ids.remove(node_id)
+                self.onNodeUntouched(node_id)
     def updateTouchedNodeIds(self):
+        # deprecating this!!
+        return
+
         # Fetch the latest list of IDs
         all_touched = self.table_api.getAllTouchedNodeIds()
 

@@ -1,5 +1,5 @@
 # src/communication/mqtt_client.py
-
+import json
 import paho.mqtt.client as mqtt
 
 # MQTT Client Setup
@@ -36,3 +36,6 @@ def publish_message(client, topic, message):
     else:
         print(f"Failed to publish message to {topic}. Error code: {result.rc}")
     return result.rc
+
+def publish_object(client, topic, data):
+    return publish_message(client, topic, json.dumps(data))
