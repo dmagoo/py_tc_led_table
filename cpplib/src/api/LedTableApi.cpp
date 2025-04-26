@@ -3,8 +3,46 @@
 #include "core/node_geometry.h"
 #include <iostream>
 
+#include <string>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
+std::string getLocalIPAddress() {
+    WSADATA wsaData;
+    char hostname[256];
+    std::string ip = "";
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+        return "";
+
+    if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
+        WSACleanup();
+        return "";
+    }
+
+    addrinfo hints = {}, *info = nullptr;
+    hints.ai_family = AF_INET; // IPv4 only
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    if (getaddrinfo(hostname, nullptr, &hints, &info) != 0) {
+        WSACleanup();
+        return "";
+    }
+
+    for (addrinfo* p = info; p != nullptr; p = p->ai_next) {
+        sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(p->ai_addr);
+        ip = inet_ntoa(addr->sin_addr);
+        break; // take the first one
+    }
+
+    freeaddrinfo(info);
+    WSACleanup();
+    return ip;
+}
+#else
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
@@ -30,8 +68,7 @@ std::string getLocalIPAddress() {
     freeifaddrs(ifaddr);
     return "";
 }
-
-
+#endif
 
 
 // Private method to convert WRGB color to the specified format
