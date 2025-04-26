@@ -4,8 +4,6 @@
 #include "config/led_table_config.h"
 #include "core/ClusterCommands.h"
 #include "core/ClusterManager.h"
-#include "core/ClusterMessageManager.h"
-// #include "core/SensorListener.h"
 #include "core/coordinates/Cartesian2dCoordinate.h"
 #include "core/coordinates/CubeCoordinate.h"
 #include "core/coordinates/RingCoordinate.h"
@@ -29,9 +27,6 @@ class LedTableApi {
 
 private:
     ClusterManager &clusterManager;
-
-    std::unique_ptr<ClusterMessageManager> clusterMessageManager;
-//    std::unique_ptr<fListener> sensorListener;
     std::unique_ptr<void, void (*)(void *)> artnetClient;
 
     bool suppressMessages = false;

@@ -1,5 +1,4 @@
 #include "LedTableApi.h"
-#include "core/ClusterMessage.h"
 #include "core/node_geometry.h"
 #include <iostream>
 

@@ -40,7 +40,6 @@
      ```
      #Windows
      #cmake --build . --target ledtableapi
-     cmake --build . --config Release --target tc_sensor_transmitter
      cmake --build . --config Release --target LedTableApi tc_led_table
      also copy libartnet.dll to src/python_bindings/Release
      #Linux (i don't recallwhy its different.. it's a mess)

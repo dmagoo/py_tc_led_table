@@ -4,9 +4,7 @@
 #include "LedTableApi.h"
 #include "config/led_table_config.h"
 #include "config/make_cluster_config.h"
-// #include "config/make_mqtt_config.h"
 #include "core/ClusterManager.h"
-#include "core/ClusterMessageManager.h"
 
 namespace py = pybind11;
 
@@ -36,10 +34,6 @@ std::shared_ptr<LedTableApi> init(LedTableConfig *config = nullptr) {
     //effectiveConfig.artnetConfig.brokerAddress = "192.168.1.50";
   } else {
     effectiveConfig.artnetConfig.brokerAddress = "192.168.1.50";
-    // Default configuration
-    effectiveConfig.mqttConfig.brokerAddress = "tcp://localhost";
-    effectiveConfig.enableMQTTMessaging = true;
-      // Set defaults for other configs as needed
   }
 
   apiSharedPtr = std::make_shared<LedTableApi>(clusterManager, effectiveConfig);

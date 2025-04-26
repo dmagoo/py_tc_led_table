@@ -26,18 +26,11 @@ def get_config_value(section, option, env_var_name, default=None):
 
 
 def add_monitor_config(led_table_config):
-    broker_address = get_config_value('MQTT', 'broker_address', 'BROKER_ADDRESS')      
-    print(f"Broker Address: {broker_address}")
-
-    led_table_config.enableMQTTMessaging=False 
     led_table_config.enableArtnetMessaging=True 
-    led_table_config.mqttConfig.brokerAddress=broker_address 
-    led_table_config.mqttConfig.clientId = 'pyMonitor'
     return led_table_config
 
 def add_controller_config(led_table_config):
     # this app is will use artnet isntead
-    led_table_config.enableMQTTMessaging=False 
     led_table_config.enableArtnetMessaging=True 
 
     broker_address = get_config_value('Artnet', 'broker_address', 'BROKER_ADDRESS')
@@ -45,24 +38,4 @@ def add_controller_config(led_table_config):
     led_table_config.artnetConfig.brokerAddress=broker_address
 
 
-    return led_table_config
-
-def add_sensor_listener_config(led_table_config):
-    broker_address = get_config_value('MQTT', 'broker_address', 'BROKER_ADDRESS')
-    print(f"Broker Address: {broker_address}")
-
-    #this app will listen for touch sensors
-    led_table_config.enableMQTTSubscriptions=True
-    led_table_config.mqttConfig.brokerAddress=broker_address
-    return led_table_config
-
-def add_sensor_transmit_config(led_table_config):
-    broker_address = get_config_value('MQTT', 'broker_address', 'BROKER_ADDRESS')      
-    print(f"Broker Address: {broker_address}")
-
-    led_table_config.enableMQTTMessaging=False
-    led_table_config.enableMQTTSubscriptions=True
-    led_table_config.enableArtnetMessaging=True 
-    led_table_config.mqttConfig.brokerAddress=broker_address
-    led_table_config.mqttConfig.clientId = 'pySensorTransmitter'
     return led_table_config

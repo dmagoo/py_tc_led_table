@@ -2,7 +2,7 @@ from bootstrap import apply
 apply()
 
 import tc_led_table
-from settings import add_controller_config, add_sensor_listener_config
+from settings import add_controller_config
 
 from TableController import TableController  # Import the App class from app.py
 from utils import wrgb_tuple_to_int
@@ -64,7 +64,6 @@ refresh
     
 def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
-    led_table_config = add_sensor_listener_config(led_table_config)
     tc_led_table.init(config=led_table_config)
     app = Wipe(tc_led_table)
     app.use_display  = False
