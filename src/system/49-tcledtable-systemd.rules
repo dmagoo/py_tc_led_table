@@ -1,0 +1,15 @@
+// Copy from: src/system/49-tcledtable-systemd.rules
+// Install to: /etc/polkit-1/rules.d/49-tcledtable-systemd.rules
+//
+// sudo cp src/system/49-tcledtable-systemd.rules /etc/polkit-1/rules.d/
+// sudo chmod 644 /etc/polkit-1/rules.d/49-tcledtable-systemd.rules
+// Behavior: Allows user 'tcledtable' to manage systemd units without authentication prompts.
+//
+// No service restart needed after installing this file. 
+// The rule takes effect immediately on the next polkit authorization check.
+
+polkit.addRule(function(action, subject) {
+    if (subject.user == "tcledtable" && action.id.indexOf("org.freedesktop.systemd1.") == 0) {
+        return polkit.Result.YES;
+    }
+});
