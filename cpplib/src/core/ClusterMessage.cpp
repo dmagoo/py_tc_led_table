@@ -17,50 +17,6 @@ CommandParamsVariant ClusterMessage::getParams() const {
     return params;
 }
 
-/*
-
-ClusterMessage createFillNodeMessage(int clusterId, int nodeId, int color) {
-    NodeWithColorParams params;
-    params.nodeId = nodeId;
-    params.color = color;
-    ClusterMessage clusterMessage(clusterId, ClusterCommandType::FillNode, params);
-    return clusterMessage;
-}
-
-ClusterMessage createBlitNodeMessage(int clusterId, int nodeId, std::vector<WRGB> colors, WRGB padColor) {
-    BlitNodeParams params;
-    params.nodeId = nodeId;
-    params.colors = std::move(colors);
-    params.padColor = padColor;
-    ClusterMessage clusterMessage(clusterId, ClusterCommandType::BlitNode, params);
-    return clusterMessage;
-}
-
-ClusterMessage createSetNodePixelMessage(int clusterId, int nodeId, int color) {
-    NodeWithPixelIndexParams params;
-    params.nodeId = nodeId;
-    params.color = color;
-    ClusterMessage clusterMessage(clusterId, ClusterCommandType::SetNodePixel, params);
-    return clusterMessage;
-}
-
-ClusterMessage createQueueNodePixelMessage(int clusterId, int nodeId, int color) {
-    NodeWithColorParams params;
-    params.nodeId = nodeId;
-    params.color = color;
-    ClusterMessage clusterMessage(clusterId, ClusterCommandType::QueueNodePixel, params);
-    return clusterMessage;
-}
-
-ClusterMessage createDequeueNodePixelMessage(int clusterId, int nodeId, int color) {
-    NodeWithColorParams params;
-    params.nodeId = nodeId;
-    params.color = color;
-    ClusterMessage clusterMessage(clusterId, ClusterCommandType::DequeueNodePixel, params);
-    return clusterMessage;
-}
-*/
-
 /**
  * Encodes a vector of WRGB colors into a protobuf stream as a repeated field.
  * This function is typically used as a callback in the protobuf encoding process,
