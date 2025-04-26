@@ -5,6 +5,7 @@ import pygame
 from receiver import ArtNetReceiver
 from utils import unpack_artnet_data_to_rgb_2d
 from TableDisplay import TableDisplay
+from communication.mqtt_client import publish_object
 
 class NodeClickBehavior(Enum):
     TOUCH_SENSOR_BRIEF = 1
@@ -12,9 +13,9 @@ class NodeClickBehavior(Enum):
     TOUCH_SENSOR_TOGGLE = 4
 
 class TableSimulator(TableDisplay):
-    def __init__(self, table_api, sensor_api):
+    def __init__(self, table_api, mqtt_client):
         super().__init__(table_api)
-        self.sensor_api = sensor_api
+        self.mqtt_client = mqtt_client
         # receiver has to be high, or there is a big back log
         self.max_frame_rate = 100000
         self.last_effect_loop = time.time()
@@ -35,7 +36,8 @@ class TableSimulator(TableDisplay):
     def handleNodeClick(self, node_id):
         old_val = self.table.nodes[node_id].touch_value
         new_value  = 0 if old_val > 50 else 100
-        output = self.sensor_api.sendTouchSensorEvent(node_id, new_value, new_value > 50);
+        publish_object(self.mqtt_client, "ledtable/sensor/touch_event", {"nodeId": node_id, "touched": new_value > 50})
+        # publish touch-event on
         self.table.nodes[node_id].touch_value = new_value
 
         if self.node_click_behavior == NodeClickBehavior.TOUCH_SENSOR_BRIEF:
@@ -48,7 +50,7 @@ class TableSimulator(TableDisplay):
             self.node_timers = {node_id: value - 1 for node_id, value in self.node_timers.items() if value - 1 > 0}
             for node_id in nodes_to_remove:
                 self.table.nodes[node_id].touch_value = 0
-                self.sensor_api.sendTouchSensorEvent(node_id, 0, False)
+                publish_object(self.mqtt_client, "ledtable/sensor/touch_event", {"nodeId": node_id, "touched": False})
 
     def handleInput(self):
         self.handleNodeTicks()

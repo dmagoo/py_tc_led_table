@@ -32,7 +32,8 @@ def setup_mqtt_client(broker_address="127.0.0.1", client_id="default-client"):
 def publish_message(client, topic, message):
     result = client.publish(topic, message)
     if result.rc == mqtt.MQTT_ERR_SUCCESS:
-        print(f"Message successfully published to {topic}. Message ID: {result.mid}")
+        # print(f"Message successfully published to {topic}. Message ID: {result.mid}")
+        pass
     else:
         print(f"Failed to publish message to {topic}. Error code: {result.rc}")
     return result.rc

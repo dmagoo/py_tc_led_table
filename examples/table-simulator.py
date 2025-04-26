@@ -13,19 +13,20 @@ apply()
 
 import tc_led_table, tc_sensor_transmitter
 
-from settings import add_monitor_config, add_sensor_transmit_config
+from settings import add_monitor_config, get_config_value
 from TableSimulator import TableSimulator
+from communication.mqtt_client import setup_mqtt_client
 
 def main():
     try:
+        broker = get_config_value("TableSimulator", "mqtt_broker_address", "MQTT_BROKER_ADDRESS")
+        client_id = get_config_value("TableSimulator", "mqtt_client_id", "MQTT_CLIENT_ID")
+        mqtt_client = setup_mqtt_client(broker_address=broker, client_id=client_id)
+
         led_table_config = add_monitor_config(tc_led_table.LedTableConfig())
         tc_led_table.init(config=led_table_config)
 
-        led_table_sensor_config = add_sensor_transmit_config(tc_led_table.LedTableConfig())
-        led_table_sensor_config.mqttConfig.clientId = 'pyTableSimulator'
-        tc_sensor_transmitter.init(config=led_table_sensor_config)
-
-        app = TableSimulator(tc_led_table, tc_sensor_transmitter)
+        app = TableSimulator(tc_led_table, mqtt_client)
         app.run()  # Start the app's main loop
 
     except ValueError as e:
