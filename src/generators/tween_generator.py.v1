@@ -1,0 +1,60 @@
+from .base_generator import BaseGenerator
+
+class TweenGenerator(BaseGenerator):
+    """
+    TweenGenerator
+
+    Maps t linearly from start to end values over time.
+    Supports optional wrapping (looping) or clamping at the endpoint.
+
+    - If wrap=True, t wraps around the range.
+    - If wrap=False, t clamps at the end (no looping).
+
+    Works for scalars or tuples (e.g., colors).
+ 
+    Example usage:
+    gen = TweenGenerator(range=(0, 100), step=1, wrap=False)
+    print(gen.get_value())   # Advances internally
+    print(gen.get_value(t=42))  # Or control explicitly with external t
+    """
+    def __init__(self, range, step, wrap=False, **params):
+        super().__init__(range=range, step=step, **params)
+        self.wrap = wrap
+
+    def get_value(self, t=None):
+        if t is None:
+            t = self.internal_t
+            self.internal_t += 1
+
+        print(f"[TweenGenerator] t={t}")
+
+        start, end = self.range
+
+        if isinstance(start, tuple):
+            return tuple(self._interpolate(s, e, t) for s, e in zip(start, end))
+        else:
+            return self._interpolate(start, end, t)
+
+    def get_valueOLD(self, t=None):
+        if t is None:
+            t = self.internal_t
+            self.internal_t += 1
+
+        start, end = self.range
+
+        if isinstance(start, tuple):
+            return tuple(self._interpolate(s, e, t) for s, e in zip(start, end))
+        else:
+            return self._interpolate(start, end, t)
+
+    def _interpolate(self, start, end, t):
+        span = end - start
+        distance = t * self.step
+
+        if self.wrap:
+            distance = distance % span
+        else:
+            distance = max(0, min(distance, span))  # Clamp between 0 and span
+
+        normalized = distance / span if span != 0 else 0
+        return start + span * normalized

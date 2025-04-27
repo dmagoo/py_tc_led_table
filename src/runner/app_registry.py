@@ -12,10 +12,16 @@ from testNode import TestNode
 from connectNodes import ConnectNodes
 
 from apps.TestApp import TestApp
+from apps.NoiseTouchTest import NoiseTouchTest
 
 APP_REGISTRY = {
     "TestApp": {
         "class": TestApp,
+        "params": {}
+        
+    },
+    "NoiseTouchTest": {
+        "class": NoiseTouchTest,
         "params": {}
         
     },

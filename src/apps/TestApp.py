@@ -1,99 +1,74 @@
 import time
-import threading
 from utils import wrgb_tuple_to_int
-from .AppBase import AppBase
+from effects.chain_effect import ChainEffect
+from effects.pixel_color_effect import PixelColorEffect
+from generators.stable_value_generator import StableValueGenerator
+from generators.tween_generator import TweenGenerator
+from apps.AppBase import AppBase
 
 class TestApp(AppBase):
     def __init__(self, table_api, params={}):
-        """
-        Initializes the TestApp.
-        :param table_api: The API to interact with the LED table (filled by AppBase)
-        :param params: Parameters specific to the TestApp (e.g., effect settings)
-        """
         super().__init__(table_api, params)
-        self.flash_duration = 1.0  # Seconds to stay white before fading back
-        self.fade_duration = 3.0   # Time it takes to fade back to black
-        self.color = (255, 255, 255, 255)  # White color
-        self.fade_color = (0, 0, 0, 0)  # Black color
-        self.flash_start_time = None
-        self.node_times = {}
+        self.active_effects = {}
 
-
-    def loop(self, tick, delta_time):
-        """
-        Main loop for the TestApp. This method is called every tick to update the state.
-        :param tick: Current tick count of the app.
-        :param delta_time: Time elapsed since the last tick.
-        """
-        this_time = time.time()
-
-
-        for node_id in self.node_times.copy().keys():
-            node_timer =  self.node_times[node_id]
-            elapsed_time = None
-            if node_timer["start_time"] is None:
-                node_timer["start_time"] = this_time
-
-            elapsed_time = this_time - node_timer["start_time"]
-
-            if not node_timer["fading"]:
-                if elapsed_time >= self.flash_duration:
-                    node_timer["fading"] = True
-                    node_timer["start_time"] = this_time
-                    self.send_node_color(node_timer)
-            else:
-                # Handle the fade-out effect
-                if elapsed_time < self.fade_duration:
-                    fade_percentage = elapsed_time / self.fade_duration
-                    node_timer["color"] = self.fade_to_black(node_timer["color"], fade_percentage)
-                    print(node_timer["color"])
-                    self.send_node_color(node_timer)
-                else:
-                    node_timer["color"] = self.fade_color 
-                    # Final fade to black
-                    self.send_node_color(node_timer)
-                    del self.node_times[node_id]
-
-        self.table_api.refresh()
-
-    def send_node_color(self, color):
-        """
-        Updates the node color. This method sends the color to the node.
-        :param color: The color to set on the node (RGBA).
-        """
-        for node_id in self.node_times.keys():
-            self.table_api.fillNode(node_id, wrgb_tuple_to_int(self.node_times[node_id]["color"]))
-
-    def fade_to_black(self, color, percentage):
-        """
-        Fades a color towards black based on the given percentage.
-        :param color: The current color (RGBA).
-        :param percentage: A float between 0 and 1 representing the fade amount.
-        :return: A new color, faded towards black.
-        """
-        return tuple(int(c * (1 - percentage)) for c in color)
+        # App params
+        self.base_color = params.get("flash_color", (255, 255, 255, 255))
+        self.fade_target = params.get("fade_target", (0, 0, 0, 0))
+        self.total_duration = params.get("total_duration", 0.1)  # seconds
+        self.flash_fraction = params.get("flash_fraction", 0.25)  # 25% flash, 75% fade
 
     def handle_node_touched(self, node_id):
-        """
-        Handles the event when a node is touched.
-        Immediately flashes the touched node white and starts the fade-out.
-        """
-        self.node_times[node_id] = {"fading": False, "start_time": False, "color": (255, 255, 255, 255)}
+        if node_id in self.active_effects:
+            return
+
+        pixel_targets = [(node_id, i) for i in range(8)]
+
+        flash_duration = self.total_duration * self.flash_fraction
+        fade_duration = self.total_duration * (1 - self.flash_fraction)
+
+        # Flash part
+        flash_gen = StableValueGenerator(self.base_color, duration=flash_duration)
+        flash_effect = PixelColorEffect(
+            self.table_api,
+            {},
+            flash_gen,
+            pixel_targets
+        )
+
+        # Fade part
+        fade_gen = TweenGenerator(
+            range=(self.base_color, self.fade_target),
+            duration=fade_duration
+        )
+        fade_effect = PixelColorEffect(
+            self.table_api,
+            {},
+            fade_gen,
+            pixel_targets
+        )
+
+        chain = ChainEffect(self.table_api, {}, [flash_effect, fade_effect])
+        self.active_effects[node_id] = chain
 
     def handle_node_untouched(self, node_id):
-        """
-        Handles the event when a node is no longer touched.
-        No action for now, but can be extended in the future.
-        """
         pass
 
-# Run the TestApp as a drop-in with AppRunner
-def main():
-    led_table_config = add_controller_config(tc_led_table.LedTableConfig())
-    tc_led_table.init(config=led_table_config)
-    app = TestApp(tc_led_table)
-    app.use_display = False  # No display needed for this test
-    app.run()
+    def loop(self, tick, delta_time):
+        for node_id, effect in list(self.active_effects.items()):
+            effect.tick(delta_time, tick)
+            effect_updates = effect.get_pixel_updates()
 
-if __name__ == "__main__":
-    main()
+            for nid, pixels in effect_updates.items():
+                for idx, color in enumerate(pixels):
+                    if color is not None:
+                        print('sending', idx, color)
+                        print('as', wrgb_tuple_to_int(color))
+                        self.table_api.setNodePixel(nid, idx, wrgb_tuple_to_int(color))
+            
+            if effect.done:
+                print('done.. here are the final updates', effect_updates)
+                del self.active_effects[node_id]
+            else:
+                print('not done yet ere are the latest updates', effect_updates)
+                
+        self.table_api.refresh()
