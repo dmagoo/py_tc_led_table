@@ -90,7 +90,10 @@ fetch("/api/services/")
       const status = document.createElement("sl-badge");
       status.variant = service.status === "active" ? "success" : "neutral";
       status.textContent = service.status;
-
+	if(!service.status){
+	    console.log({ service })
+	          status.textContent = 'unknown'
+	}
       wrapper.appendChild(label);
       wrapper.appendChild(status);
 

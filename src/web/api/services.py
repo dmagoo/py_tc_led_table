@@ -9,8 +9,17 @@ services_bp = Blueprint("services", __name__, url_prefix="/api/services")
 
 def get_service_status(name):
     try:
-        result = subprocess.run(["sudo", "systemctl", "is-active", name], capture_output=True, text=True, timeout=2)
+        result = subprocess.run(
+            ["sudo", "systemctl", "is-active", name],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=True  # <-- add this
+        )
+        print(result.stdout)
         return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return "offline"
     except Exception as e:
         return f"error: {e}"
 
@@ -22,7 +31,7 @@ def list_services():
         result.append({
             "name": name,
             "label": meta["label"],
-            "status": status,
+            "status": status or "offline",
             "controllable": meta["controllable"]
         })
     return jsonify(result)
