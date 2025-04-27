@@ -28,9 +28,7 @@ class ChainEffect(BaseEffect):
         self.latest_pixel_updates = current_effect.get_pixel_updates()
 
         if current_effect.done:
-            print("effect done! advancing")
             self.current_index += 1
-            print(f"ChainEffect advancing to effect index {self.current_index}")
 
             if self.current_index >= len(self.effects):
                 self.done = True

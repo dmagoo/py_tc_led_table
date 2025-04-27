@@ -61,14 +61,9 @@ class TestApp(AppBase):
             for nid, pixels in effect_updates.items():
                 for idx, color in enumerate(pixels):
                     if color is not None:
-                        print('sending', idx, color)
-                        print('as', wrgb_tuple_to_int(color))
                         self.table_api.setNodePixel(nid, idx, wrgb_tuple_to_int(color))
             
             if effect.done:
-                print('done.. here are the final updates', effect_updates)
                 del self.active_effects[node_id]
-            else:
-                print('not done yet ere are the latest updates', effect_updates)
                 
         self.table_api.refresh()
