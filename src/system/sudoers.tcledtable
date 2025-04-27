@@ -5,9 +5,9 @@
 #
 # Grants the 'tcledtable' user passwordless control over specific systemd services.
 
-tcledtable ALL=NOPASSWD: /bin/systemctl start manage_effects.service, \
-                         /bin/systemctl stop manage_effects.service, \
-                         /bin/systemctl restart manage_effects.service, \
+tcledtable ALL=NOPASSWD: /bin/systemctl start manage_apps.service, \
+                         /bin/systemctl stop manage_apps.service, \
+                         /bin/systemctl restart manage_apps.service, \
                          /bin/systemctl start monitor-serial.service, \
                          /bin/systemctl stop monitor-serial.service, \
                          /bin/systemctl restart monitor-serial.service, \

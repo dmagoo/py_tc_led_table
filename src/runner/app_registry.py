@@ -1,4 +1,4 @@
-# effect_registry.py
+# app_registry.py
 # Lives next to EffectRunner. Used by both runner and Flask.
 import sys
 sys.path.append('examples')
@@ -11,7 +11,14 @@ from wipe import Wipe
 from testNode import TestNode
 from connectNodes import ConnectNodes
 
-EFFECT_REGISTRY = {
+from apps.TestApp import TestApp
+
+APP_REGISTRY = {
+    "TestApp": {
+        "class": TestApp,
+        "params": {}
+        
+    },
     "StatusPulse": {
         "class": StatusPulse,
         "params": {

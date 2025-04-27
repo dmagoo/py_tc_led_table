@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from runner.effect_registry import EFFECT_REGISTRY
+from runner.app_registry import APP_REGISTRY
 
 import sys
 import os

@@ -14,6 +14,7 @@ script_dir = os.path.dirname(__file__)
 sys.path.append('src')
 sys.path.append('src/config')
 sys.path.append('src/communication')
+sys.path.append(os.path.abspath('cpplib/python_bindings/Release'))
 
 from communication.mqtt_client import setup_mqtt_client, publish_object
 from communication.message_manager import MessageManager

@@ -2,8 +2,8 @@
 # Whitelist of services for UI control and monitoring
 
 SERVICE_REGISTRY = {
-    "manage_effects.service": {
-        "label": "Effect Runner",
+    "manage_apps.service": {
+        "label": "App Runner",
         "controllable": True
     },
     "monitor-serial.service": {

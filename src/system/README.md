@@ -127,16 +127,16 @@ WantedBy=multi-user.target
 sudo systemctl enable status-server.service
 ```
 
-### 3. Manage Effects
+### 3. Manage Apps
 
-Path: `/etc/systemd/system/manage_effects.service`
+Path: `/etc/systemd/system/manage_apps.service`
 ```ini
 [Unit]
-Description=Effect Runner Service
+Description=App Runner Service
 After=multi-user.target
 
 [Service]
-ExecStart=/usr/local/bin/manage_effects.sh
+ExecStart=/usr/local/bin/manage_apps.sh
 Restart=always
 User=pi
 
@@ -144,7 +144,7 @@ User=pi
 WantedBy=multi-user.target
 ```
 ```sh
-sudo systemctl enable manage_effects.service
+sudo systemctl enable manage_apps.service
 ```
 
 ## Fallback Summary

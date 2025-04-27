@@ -1,34 +1,34 @@
 import { renderParamControls } from './paramRenderer.js';
 
-const effectSelect = document.getElementById("effect-select");
+const appSelect = document.getElementById("app-select");
 const paramControls = document.getElementById("param-controls");
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 
-let effects = {};
+let apps = {};
 
-fetch("/api/effects/")
+fetch("/api/apps/")
   .then(response => response.json())
   .then(data => {
-    effects = Object.fromEntries(data.map(e => [e.name, e]));
-    data.forEach(effect => {
+    apps = Object.fromEntries(data.map(e => [e.name, e]));
+    data.forEach(app => {
       const option = document.createElement("sl-option");
-      option.value = effect.name;
-      option.textContent = effect.name;
-      effectSelect.appendChild(option);
+      option.value = app.name;
+      option.textContent = app.name;
+      appSelect.appendChild(option);
     });
   });
 
-effectSelect.addEventListener("sl-change", () => {
-  const effect = effects[effectSelect.value];
-  if (effect) {
-    renderParamControls(effect.params, paramControls);
+appSelect.addEventListener("sl-change", () => {
+  const app = apps[appSelect.value];
+  if (app) {
+    renderParamControls(app.params, paramControls);
   }
 });
 
 startButton.addEventListener("click", () => {
-  const selectedEffect = effectSelect.value;
-  if (!selectedEffect) return;
+  const selectedApp = appSelect.value;
+  if (!selectedApp) return;
 
   const paramData = {};
   paramControls.querySelectorAll("[data-param-name]").forEach(wrapper => {
@@ -46,12 +46,12 @@ startButton.addEventListener("click", () => {
     }
   });
 
-  fetch("/api/effects/start", {
+  fetch("/api/apps/start", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ effect: selectedEffect, params: paramData })
+    body: JSON.stringify({ app: selectedApp, params: paramData })
   })
   .then(res => res.json())
   .then(data => console.log("Started:", data))
@@ -61,7 +61,7 @@ startButton.addEventListener("click", () => {
 stopButton.addEventListener("click", () => {
   const paramData = {};
 
-  fetch("/api/effects/stop", {
+  fetch("/api/apps/stop", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

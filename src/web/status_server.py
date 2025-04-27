@@ -1,5 +1,5 @@
 # src/web/status_server.py
-# Flask app entry point with status and effects routes
+# Flask app entry point with status and apps routes
 
 #!/usr/bin/env python3
 from flask import Flask, jsonify, render_template
@@ -22,8 +22,8 @@ app.config["message_manager"] = message_manager
 from web.api.services import services_bp
 app.register_blueprint(services_bp)
 
-from web.api.effects import effects_bp
-app.register_blueprint(effects_bp)
+from web.api.apps import apps_bp
+app.register_blueprint(apps_bp)
 
 from web.api.status import status_bp
 app.register_blueprint(status_bp)

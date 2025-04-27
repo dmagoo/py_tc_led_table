@@ -1,20 +1,20 @@
 {
     "idle": {
-      "effect": "StatusPulse",
+      "app": "StatusPulse",
       "params": {
         "color": [0, 0, 160, 0],
         "speed": 1
       }
     },
     "error": {
-      "effect": "StatusPulse",
+      "app": "StatusPulse",
       "params": {
           "color": [0, 160, 0, 0],
         "speed": 1
       }
     },
     "warning": {
-      "effect": "StatusPulse",
+      "app": "StatusPulse",
       "params": {
         "color": [0, 160, 160, 0],
         "speed": 1

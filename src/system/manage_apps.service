@@ -1,24 +1,24 @@
-# Copy from: src/system/status-server.service
-# Install to: /etc/systemd/system/status-server.service
+# Copy from: src/system/manage-apps.service
+# Install to: /etc/systemd/system/manage-apps.service
 #
 # Behavior: Restarts only on crash (not on manual stop).
 # If it crashes 3 times within 30 seconds, systemd gives up.
 #
 # To install and enable:
-# 1. sudo cp src/system/status-server.service /etc/systemd/system/
+# 1. sudo cp src/system/manage-apps.service /etc/systemd/system/
 # 2. sudo systemctl daemon-reload
-# 3. sudo systemctl enable status-server.service
-# 4. sudo systemctl start status-server.service
+# 3. sudo systemctl enable manage-apps.service
+# 4. sudo systemctl start manage-apps.service
 # To stop or restart:
-# 5. sudo systemctl stop status-server.service
-# 6. sudo systemctl restart status-server.service
+# 5. sudo systemctl stop manage-apps.service
+# 6. sudo systemctl restart manage-apps.service
 
 [Unit]
-Description=LED Table Status Server (Flask)
+Description=Effect Runner for LED Table
 After=network.target
 
 [Service]
-ExecStart=/home/tcledtable/projects/py_tc_led_table/.venv/bin/python src/web/status_server.py
+ExecStart=/home/tcledtable/projects/py_tc_led_table/.venv/bin/python src/runner/manage_apps.py
 WorkingDirectory=/home/tcledtable/projects/py_tc_led_table
 User=tcledtable
 Group=tcledtable
