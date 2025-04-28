@@ -88,11 +88,17 @@ class AppRunner:
     def handle_app_stop(self, client, userdata, msg):
         self.stop_current_app()
 
-
     def stop_current_app(self):
         if self.current_app:
             self.current_app.stop()
             self.current_app.wait_until_done()
+
+            self.table_api.reset()
+            # reset should do this, but i'm debugging
+            # to see if an explicit shutdown works
+            for node_id in self.table_api.listNodeIds():
+                self.table_api.fillNode(node_id, 0x00000000)
+            self.table_api.refresh()
 
     def get_next_app_name(self):
         self.current_app_index = (self.current_app_index + 1) % len(self.app_order)
