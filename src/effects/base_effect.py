@@ -13,7 +13,7 @@ Developer Tip:
 """
 
 class BaseEffect:
-    def __init__(self, table_api, params, stop_condition=None):
+    def __init__(self, table_api, stop_condition=None, **params):
         self.table_api = table_api
         self.params = params
         self.stop_condition = stop_condition

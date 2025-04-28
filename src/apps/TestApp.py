@@ -30,9 +30,9 @@ class TestApp(AppBase):
         flash_gen = StableValueGenerator(self.base_color, duration=flash_duration)
         flash_effect = PixelColorEffect(
             self.table_api,
-            {},
             flash_gen,
-            pixel_targets
+            pixel_targets,
+            {}
         )
 
         # Fade part

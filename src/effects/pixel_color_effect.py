@@ -4,16 +4,16 @@ class PixelColorEffect(BaseEffect):
     """
     PixelColorEffect
 
-    Colors a fixed set of (node_id, pixel_index) targets based on a generator.
+    Colors a fixed set of (node_id, pixel_index) targets based on a color_generator.
     Each tick, all targeted pixels are updated together to the generated color.
 
-    - Uses elapsed_time (seconds) as input to the generator.
-    - Automatically stops if the generator reports done.
+    - Uses elapsed_time (seconds) as input to the color_generator.
+    - Automatically stops if the color_generator reports done.
     """
 
-    def __init__(self, table_api, params, generator, pixel_targets):
-        super().__init__(table_api, params)
-        self.generator = generator
+    def __init__(self, table_api, color_generator, pixel_targets, **params):
+        super().__init__(table_api, **params)
+        self.color_generator = color_generator
         self.pixel_targets = pixel_targets
         self.current_color = None
 
@@ -21,14 +21,14 @@ class PixelColorEffect(BaseEffect):
         self.internal_tick += 1
         self.elapsed_time += delta_time
 
-        # Check if generator reports done at this elapsed time
-        if hasattr(self.generator, 'is_done') and self.generator.is_done(self.elapsed_time):
+        # Check if color_generator reports done at this elapsed time
+        if hasattr(self.color_generator, 'is_done') and self.color_generator.is_done(self.elapsed_time):
             # Force exact final value
-            final_value = self.generator.get_value(t=self.generator.duration)
+            final_value = self.color_generator.get_value(t=self.color_generator.duration)
             self._set_color(final_value)
             self.done = True
         else:
-            raw_value = self.generator.get_value(t=self.elapsed_time)
+            raw_value = self.color_generator.get_value(t=self.elapsed_time)
             self._set_color(raw_value)
 
     def _set_color(self, raw_value):

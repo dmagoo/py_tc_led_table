@@ -8,7 +8,7 @@ class ChainEffect(BaseEffect):
     Only the active effect is ticked at any time.
     """
 
-    def __init__(self, table_api, params, effects, stop_condition=None):
+    def __init__(self, table_api, effects, stop_condition=None, **params):
         super().__init__(table_api, params, stop_condition)
         self.effects = effects  # List of effect instances
         self.current_index = 0
