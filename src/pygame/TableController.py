@@ -62,7 +62,6 @@ class TableController(TableDisplay):
 
 
     def handle_touch_event(self, node_id, touched):
-        print(node_id)
         if touched:
             if node_id not in self.touched_node_ids:
                 self.touched_node_ids.insert(0, node_id)
