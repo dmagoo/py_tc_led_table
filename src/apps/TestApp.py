@@ -14,8 +14,8 @@ class TestApp(AppBase):
         # App params
         self.base_color = params.get("flash_color", (255, 255, 255, 255))
         self.fade_target = params.get("fade_target", (0, 0, 0, 0))
-        self.total_duration = params.get("total_duration", 0.1)  # seconds
-        self.flash_fraction = params.get("flash_fraction", 0.25)  # 25% flash, 75% fade
+        self.total_duration = params.get("total_duration", 1)  # seconds
+        self.flash_fraction = params.get("flash_fraction", 0.68)  # 68% flash, 32% fade
 
     def handle_node_touched(self, node_id):
         if node_id in self.active_effects:

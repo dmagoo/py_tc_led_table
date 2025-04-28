@@ -23,6 +23,7 @@ class AppBase:
         Main loop for the app. This is where the app will advance.
         The loop will be called with the current tick and delta time values.
         """
+
         last_time = time.time()
         while self.running:
             current_time = time.time()
@@ -30,7 +31,7 @@ class AppBase:
             self.tick += 1
             last_time = current_time
             self.loop(self.tick, self.delta_time)
-            time.sleep(0.1)  # Adjust for timing consistency
+            time.sleep(0.001)  # Adjust for timing consistency
 
     def loop(self, tick, delta_time):
         """

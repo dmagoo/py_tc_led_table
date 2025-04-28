@@ -12,7 +12,7 @@ class NoiseTouchTest(AppBase):
         self.touch_min = params.get("touch_min", (0, 60, 0, 0))
         self.touch_max = params.get("touch_max", (0, 90, 0, 0))
         self.untouch_min = params.get("untouch_min", (0, 0, 0, 0))
-        self.untouch_max = params.get("untouch_max", (0, 0, 30, 10))
+        self.untouch_max = params.get("untouch_max", (0, 0, 1, 8))
 
 
         self.hold_time = params.get("hold_time", 0.05)
