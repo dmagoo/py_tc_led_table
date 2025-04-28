@@ -17,6 +17,6 @@ tcledtable ALL=NOPASSWD: /bin/systemctl start manage_apps.service, \
                          /bin/systemctl is-active monitor-serial.service, \
                          /bin/systemctl start mosquitto.service, \
                          /bin/systemctl stop mosquitto.service, \
-                         /bin/systemctl restart mosquitto.service
-                         /bin/systemctl status mosquitto.service
+                         /bin/systemctl restart mosquitto.service, \
+                         /bin/systemctl status mosquitto.service, \
                          /bin/systemctl is-active mosquitto.service
