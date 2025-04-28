@@ -13,11 +13,25 @@ from connectNodes import ConnectNodes
 
 from apps.TestApp import TestApp
 from apps.NoiseTouchTest import NoiseTouchTest
+from apps.Zapper import Zapper
 
 APP_REGISTRY = {
     "TestApp": {
         "class": TestApp,
         "params": {}
+        
+    },
+    "Zapper": {
+        "class": Zapper,
+        "params": {
+            "difficulty": {
+                "type": "int",
+                "default": 1,
+                "min": 1,
+                "max": 3,
+                "widget": "slider"
+            }
+        }
         
     },
     "NoiseTouchTest": {

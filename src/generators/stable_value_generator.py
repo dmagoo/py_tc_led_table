@@ -14,6 +14,8 @@ class StableValueGenerator(BaseGenerator):
         return self.value
 
     def is_done(self, t):
+        if super().is_done(t):
+            return True
         if self.duration is None:
             return False
-        return t >= self.duration
+        return t > self.duration

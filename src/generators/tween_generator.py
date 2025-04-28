@@ -6,11 +6,19 @@ class TweenGenerator(BaseGenerator):
 
     Linearly interpolates from start to end over a fixed duration.
     Clamps at start and end (no wrapping).
+
+    - Requires either duration or max_len.
     """
-    def __init__(self, range, duration, **params):
+    def __init__(self, range, duration=None, **params):
         super().__init__(**params)
         self.range = range
-        self.duration = duration
+
+        if duration is not None:
+            self.duration = duration
+        elif self.max_len is not None:
+            self.duration = self.max_len - 1
+        else:
+            raise ValueError("TweenGenerator requires either duration or max_len")
 
     def compute(self, t):
         start, end = self.range
@@ -25,4 +33,6 @@ class TweenGenerator(BaseGenerator):
         return start + (end - start) * t_normalized
 
     def is_done(self, t):
-        return t >= self.duration
+        if super().is_done(t):
+            return True
+        return t > self.duration
