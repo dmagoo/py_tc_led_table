@@ -113,7 +113,8 @@ class TableDisplay:
     def update_display(self):
         self.screen.fill(self.screen_background_color)  # Clear the screen with black
         for node in self.table.nodes:
-            node_bg = (100,0,0) if node.touch_value > 50 else BLACK
+            # node_bg = (100,0,0) if node.touch_value > 50 else BLACK
+            node_bg = node.color
             pygame.draw.circle(self.screen, RING_BACKGROUND, self.node_positions[node.id], node.radius)  # Example of drawing a node
             pygame.draw.circle(self.screen, node_bg, self.node_positions[node.id], node.radius-self.node_ring_thickness)  # Example of drawing a node
             if node.colors:

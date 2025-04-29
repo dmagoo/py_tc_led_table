@@ -3,13 +3,15 @@ from utils import perceptual_display_color
 
 NODE_COLOR_DEFAULT = (33,33,33)
 
+
 class Node:
-    def __init__(self, id, coord, radius, color=NODE_COLOR_DEFAULT):
+    def __init__(self, id, coord, radius, color=NODE_COLOR_DEFAULT, touch_threshold=50):
         self.id = id
         self.cartesian_2d_coord = coord
         self.radius = radius
         self.color = color
         self._colors = [self._pad_color(color) for _ in range(8)]
+        self.touch_threshold = touch_threshold
         self.touch_value = 0
 
     @staticmethod
@@ -20,7 +22,9 @@ class Node:
     @property
     def colors(self):
         return self._colors
-
+    @property
+    def touched(self):
+        return self.touch_value >= self.touch_threshold
 
     @colors.setter
     def colors(self, value):
