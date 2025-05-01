@@ -18,6 +18,15 @@ class NodeState(Enum):
     HOLDING = 3
     PINNED = 4
 
+TOTAL_NODE_COUNT = 37
+FIRST_CLUSTER_NODE_SIZE = 7
+CLUSTER_NODE_SIZE = 10
+FIRST_CLUSTER_OFFSET = CLUSTER_NODE_SIZE - FIRST_CLUSTER_NODE_SIZE
+PIXELS_PER_NODE = 8
+CHANNELS_PER_PIXEL = 4
+FIRST_NODE_NUM_CHANNELS = FIRST_CLUSTER_NODE_SIZE * PIXELS_PER_NODE
+NODE_NUM_CHANNELS = CLUSTER_NODE_SIZE * PIXELS_PER_NODE
+
 class TableSimulator(TableDisplay):
     def __init__(self, table_api, mqtt_client):
         super().__init__(table_api)
@@ -156,8 +165,30 @@ class TableSimulator(TableDisplay):
 
             if universe == 0:
                 first_node = 0
+                node_num_channels = FIRST_NODE_NUM_CHANNELS
+                total_nodes = FIRST_CLUSTER_NODE_SIZE
             else:
-                first_node = universe * 10 - 3
+                first_node = universe * CLUSTER_NODE_SIZE - FIRST_CLUSTER_OFFSET
+                node_num_channels = NODE_NUM_CHANNELS
+                total_nodes = CLUSTER_NODE_SIZE
+
+            #print("colorlen", len(colors))
+            #print(colors)
+            #print("tnl", len(self.table.nodes))
+            #for i in range(min(len(colors), node_num_channels)):
+            max_node_id = first_node + total_nodes-1
 
             for i in range(len(colors)):
-                self.table.nodes[first_node + i].colors = colors[i]
+                node_id = first_node + i
+                if node_id > max_node_id:
+                    break
+                try:
+                    self.table.nodes[node_id].colors = colors[i]
+                except:
+                    #print("node_count=",len(self.table.nodes))
+                    print("i",i)
+                    print("node index", first_node+i)
+                    print("node=", first_node+i)
+                    print(len(self.table.nodes))
+                    #print("new colors will be is", colors[i])
+                    #raise "the dead"
