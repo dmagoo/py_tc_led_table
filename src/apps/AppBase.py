@@ -31,7 +31,7 @@ class AppBase:
             self.tick += 1
             last_time = current_time
             self.loop(self.tick, self.delta_time)
-            time.sleep(0.001)  # Adjust for timing consistency
+            time.sleep(0.005)  # Adjust for timing consistency
 
     def loop(self, tick, delta_time):
         """

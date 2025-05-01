@@ -31,8 +31,7 @@ class NoiseTouchTest(AppBase):
         effect = PixelColorEffect(
             self.table_api,
             generator,
-            pixel_targets,
-            {},
+            pixel_targets
         )
 
         self.active_effects[node_id] = effect
