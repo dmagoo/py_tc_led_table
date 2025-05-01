@@ -1,3 +1,4 @@
+from time import perf_counter
 import time
 import threading
 import json
@@ -12,9 +13,15 @@ class AppBase:
         self.table_api = table_api
         self.params = params
         self.tick = 0
+        # 1 / 60 ≈ 0.0167 seconds between frames
+        # 60 fps
+        self.seconds_between_frames = 0.0167
         self.delta_time = 0.0
         self.running = True
         self._exit_event = threading.Event()
+        self.always_send_pixel_data = False
+        self.should_send_pixel_data = False
+        self._last_send_time = perf_counter()
         # Keep track of touched node IDs
         self.touched_node_ids = []
 
@@ -26,12 +33,25 @@ class AppBase:
 
         last_time = time.time()
         while self.running:
+            if self.always_send_pixel_data:
+                self.should_send_pixel_data = True
             current_time = time.time()
             self.delta_time = current_time - last_time
             self.tick += 1
             last_time = current_time
             self.loop(self.tick, self.delta_time)
+            self.send_pixels_if_needed()
             time.sleep(0.005)  # Adjust for timing consistency
+
+    def send_pixel_data(self):
+        self.should_send_pixel_data = True
+
+    def send_pixels_if_needed(self):
+        now = perf_counter()
+        if self.should_send_pixel_data and (now - self._last_send_time) >= self.seconds_between_frames:
+            self.table_api.refresh()
+            self._last_send_time = now
+            self.should_send_pixel_data = False
 
     def loop(self, tick, delta_time):
         """

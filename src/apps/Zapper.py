@@ -22,6 +22,7 @@ class State(Enum):
 class Zapper(AppBase):
     def __init__(self, table_api, params={}):
         super().__init__(table_api, params)
+        self.always_send_pixel_data = True
         self.reset()
 
     def reset(self):
@@ -127,4 +128,4 @@ class Zapper(AppBase):
         self.update_node_states()
         self.advance_effects(tick, delta_time)
         self.apply_effects()
-        self.table_api.refresh()
+

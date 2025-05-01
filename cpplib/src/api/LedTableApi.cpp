@@ -395,8 +395,8 @@ void LedTableApi::initArtnetClient(const char *ip) {
     }
 }
 
-/*
-PRIOR NON-PADDED VERSION
+
+
 void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffer) {
     if (artnetClient) {
         std::vector<uint8_t> dmxData;
@@ -418,6 +418,8 @@ void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffe
         std::cerr << "NO ART NET" << std::endl;
     }
 }
+
+/*
 
 POTENTIAL OPTIMIZATION:
 
@@ -448,7 +450,6 @@ void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffe
 }
 
 
-    */
 void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffer) {
     if (artnetClient) {
         std::vector<uint8_t> dmxData;
@@ -472,5 +473,4 @@ void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffe
     }
 }
 
-
-
+*/
