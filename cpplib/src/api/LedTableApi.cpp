@@ -395,6 +395,8 @@ void LedTableApi::initArtnetClient(const char *ip) {
     }
 }
 
+/*
+PRIOR NON-PADDED VERSION
 void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffer) {
     if (artnetClient) {
         std::vector<uint8_t> dmxData;
@@ -409,6 +411,59 @@ void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffe
             dmxData.insert(dmxData.end(), convertedColor.begin(), convertedColor.end());
 
         }
+        if (artnet_send_dmx(artnetClient.get(), clusterId, dmxData.size(), dmxData.data()) != ARTNET_EOK) {
+            std::cerr << "Error" << artnet_strerror() << std::endl;
+        }
+    } else {
+        std::cerr << "NO ART NET" << std::endl;
+    }
+}
+
+POTENTIAL OPTIMIZATION:
+
+void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffer) {
+    if (artnetClient) {
+        // Pre-fill full DMX frame with black (0x00)
+        std::vector<uint8_t> dmxData(ARTNET_DMX_LENGTH, 0x00);
+
+        for (size_t i = 0; i < buffer.size(); ++i) {
+            std::array<uint8_t, 4> convertedColor = convertColor(buffer[i], ARTNET_PACKET_FORMAT::GRBW);
+            size_t idx = i * 4;
+
+            // Safely write within bounds
+            if (idx + 3 < dmxData.size()) {
+                dmxData[idx]     = convertedColor[0];
+                dmxData[idx + 1] = convertedColor[1];
+                dmxData[idx + 2] = convertedColor[2];
+                dmxData[idx + 3] = convertedColor[3];
+            }
+        }
+
+        if (artnet_send_dmx(artnetClient.get(), clusterId, dmxData.size(), dmxData.data()) != ARTNET_EOK) {
+            std::cerr << "Error" << artnet_strerror() << std::endl;
+        }
+    } else {
+        std::cerr << "NO ART NET" << std::endl;
+    }
+}
+
+
+    */
+void LedTableApi::sendClusterArtnet(int clusterId, const std::vector<WRGB> buffer) {
+    if (artnetClient) {
+        std::vector<uint8_t> dmxData;
+        dmxData.reserve(512); // Reserve full DMX universe size
+
+        for (WRGB color : buffer) {
+            std::array<uint8_t, 4> convertedColor = convertColor(color, ARTNET_PACKET_FORMAT::GRBW);
+            dmxData.insert(dmxData.end(), convertedColor.begin(), convertedColor.end());
+        }
+
+        // Pad with black (0x00) to reach 512 bytes if needed
+        if (dmxData.size() < 512) {
+            dmxData.resize(512, 0x00);
+        }
+
         if (artnet_send_dmx(artnetClient.get(), clusterId, dmxData.size(), dmxData.data()) != ARTNET_EOK) {
             std::cerr << "Error" << artnet_strerror() << std::endl;
         }
