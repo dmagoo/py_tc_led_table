@@ -1,12 +1,9 @@
-[submodule "lib/CLI11"]
- path = lib/CLI11
- url = https://github.com/CLIUtils/CLI11.git
-[submodule "lib/Unity"]
- path = lib/Unity
- url = https://github.com/ThrowTheSwitch/Unity.git
-[submodule "lib/pybind11"]
- path = lib/pybind11
- url = https://github.com/pybind/pybind11.git
-[submodule "lib/libartnet"]
- path = lib/libartnet
- url = https://github.com/OpenLightingProject/libartnet.git
+[submodule "external/CLI11"]
+	path = external/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
+[submodule "external/Unity"]
+	path = external/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "external/libartnet"]
+	path = external/libartnet
+	url = https://github.com/OpenLightingProject/libartnet.git

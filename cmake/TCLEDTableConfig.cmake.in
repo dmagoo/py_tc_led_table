@@ -1,0 +1,23 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+find_dependency(CLI11 REQUIRED)
+
+if(@TCLEDTABLE_BUILD_PYTHON_BINDINGS@)
+    find_dependency(pybind11 REQUIRED)
+endif()
+
+# Platform-specific dependencies
+if(WIN32)
+    # Windows dependencies would be found here
+else()
+    find_dependency(eclipse-paho-mqtt-c QUIET)
+    find_dependency(PahoMqttCpp QUIET)
+endif()
+
+# Include targets file
+include("${CMAKE_CURRENT_LIST_DIR}/TCLEDTableTargets.cmake")
+
+check_required_components(TCLEDTable)

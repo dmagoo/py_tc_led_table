@@ -215,8 +215,8 @@ def main():
     tc_led_table.init(config=led_table_config)
     app = SnekApp(tc_led_table)  # Create an instance of the App class
 
-    # to run without the pygame display:
-    app.use_display = False
+    # Enable the pygame display like statusPulse.py
+    app.use_display = True
 
     app.run()  # Start the app's main loop
 

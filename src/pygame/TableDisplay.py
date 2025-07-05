@@ -1,6 +1,10 @@
 # src/pygame/TableDisplay.py
 import pygame
-import pygame.freetype
+try:
+    import pygame.freetype
+except ImportError:
+    print("Warning: pygame.freetype not available, some text features may not work")
+    pygame.freetype = None
 import time
 import random
 import math
@@ -101,10 +105,30 @@ class TableDisplay:
     def get_node_id_from_pos(self, pos, radius=None):
         radius = radius if radius is not None else self.node_radius
         x, y = pos
+        
+        # Debug: Print mouse position
+        print(f"Mouse click at: ({x}, {y})")
+        
+        closest_node = None
+        closest_distance = float('inf')
+        
         for node_id, (node_x, node_y) in enumerate(self.node_positions):
             distance = ((node_x - x) ** 2 + (node_y - y) ** 2) ** 0.5
+            
+            # Track closest node for debugging
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_node = node_id
+            
             if distance <= radius:
+                print(f"Hit node {node_id} at ({node_x}, {node_y}), distance: {distance:.1f}")
                 return node_id
+        
+        # Debug: Show closest node if no hit
+        if closest_node is not None:
+            node_x, node_y = self.node_positions[closest_node]
+            print(f"No hit. Closest was node {closest_node} at ({node_x}, {node_y}), distance: {closest_distance:.1f}, radius: {radius}")
+        
         return None
 
     def tick(self):

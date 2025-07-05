@@ -64,14 +64,41 @@ class ArtNetReceiver:
     @property
     def socket(self):
         if self._socket is None:
-            self._socket = socket.socket(
-                socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
-            )
-            self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self._socket.bind((self.ip, self.port))
-            if self.timeout is not None:  # Set the timeout if it's specified
-                self._socket.settimeout(self.timeout)
+            try:
+                self._socket = socket.socket(
+                    socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
+                )
+                self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                # Try to set SO_REUSEPORT if available (Linux/macOS)
+                try:
+                    self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+                except (AttributeError, OSError):
+                    pass  # SO_REUSEPORT not available or not supported
+                
+                self._socket.bind((self.ip, self.port))
+                if self.timeout is not None:  # Set the timeout if it's specified
+                    self._socket.settimeout(self.timeout)
+            except OSError as e:
+                if e.errno == 98:  # Address already in use
+                    print(f"Warning: Port {self.port} already in use. Using a different port...")
+                    # Try a different port for testing
+                    self.port = 0  # Let OS choose an available port
+                    self._socket.bind((self.ip, self.port))
+                    actual_port = self._socket.getsockname()[1]
+                    print(f"Using port {actual_port} instead of 6454")
+                else:
+                    raise
         return self._socket
+
+    def cleanup(self):
+        """Close the socket and clean up resources."""
+        if self._socket is not None:
+            self._socket.close()
+            self._socket = None
+
+    def __del__(self):
+        """Ensure socket is closed when object is destroyed."""
+        self.cleanup()
 
     def receive(self):
         try:

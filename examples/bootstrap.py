@@ -12,3 +12,4 @@ def apply():
     from bootstrap_bindings import setup_paths
     setup_paths()
 
+

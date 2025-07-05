@@ -4,10 +4,11 @@ import platform
 
 def setup_paths():
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    bindings_dir = os.path.join(project_root, "cpplib", "python_bindings")
+    # Updated to use the new build location
+    bindings_dir = os.path.join(project_root, "build", "python")
 
     if platform.system() == "Windows":
-        bindings_dir = os.path.join(bindings_dir, "Release")
+        # For Windows, we might need to adjust this path
         if hasattr(os, 'add_dll_directory'):
             os.add_dll_directory(bindings_dir)
 

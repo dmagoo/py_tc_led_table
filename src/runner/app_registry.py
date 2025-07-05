@@ -1,7 +1,14 @@
 # app_registry.py
 # Lives next to EffectRunner. Used by both runner and Flask.
+import os
 import sys
-sys.path.append('examples')
+
+# Add examples directory to path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+examples_dir = os.path.join(project_root, 'examples')
+if examples_dir not in sys.path:
+    sys.path.append(examples_dir)
 
 from ripple import Ripple
 from snek import SnekApp
