@@ -22,6 +22,7 @@ NODE_COUNT = 37
 
 def get_random_color():
     return (
+        0,  # White channel
         random.randint(11, 255),
         random.randint(30, 180),
         random.randint(0, 120)
@@ -30,14 +31,24 @@ def get_random_color():
 class Ripple(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
+        self.auto_start = params.get("auto_start", 0)
         self.default_ripple_time = params.get("speed", 20)
         self.color = tuple(params.get("color", get_random_color()))
         self.reach = params.get("reach", 4)
         self.neighbor_ripple_time = int(self.default_ripple_time * 1.4)
         self.ripples_per_event = 1.3
+        self.last_auto_ripple = 0
+        self.auto_ripple_interval = 2.0  # seconds between auto ripples
 
         self.ripple_timers = {}
         self.ripple_brightness = {}
+        
+        # If auto-start is enabled, start the first ripple from center
+        if self.auto_start > 0:
+            print("Auto-start mode: Creating initial ripple from center")
+            # Find center node (assuming node 18 is roughly center for a 37-node table)
+            center_node = NODE_COUNT // 2
+            self.onNodeTouched(center_node)
 
     def onNodeTouched(self, node_id):
         """
@@ -72,6 +83,16 @@ class Ripple(TableController):
 
 
     def doEffectLoop(self):
+        # Auto-start ripples if enabled and enough time has passed
+        if self.auto_start and len(self.ripple_timers) < 3:  # Keep at most 3 ripples
+            current_time = time.time()
+            if current_time - self.last_auto_ripple > self.auto_ripple_interval:
+                # Create ripple at random node
+                random_node = random.randint(0, NODE_COUNT - 1)
+                print(f"Auto-creating ripple at node {random_node}")
+                self.onNodeTouched(random_node)
+                self.last_auto_ripple = current_time
+        
         nodes_to_check = list(self.ripple_timers.keys())
         for node_id in nodes_to_check:
             self.ripple_timers[node_id] -= 1
@@ -123,10 +144,17 @@ class Ripple(TableController):
 
 
 def main():
+    # Parse command line arguments for auto_start
+    params = {}
+    for arg in sys.argv[1:]:
+        if arg == "auto_start":
+            params["auto_start"] = 1
+
+    
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     tc_led_table.init(config=led_table_config)
-    app = Ripple(tc_led_table)
-    app.use_display  = False
+    app = Ripple(tc_led_table, params)
+    app.use_display = False
     app.run()
 if __name__ == "__main__":
     main()
