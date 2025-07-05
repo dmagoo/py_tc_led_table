@@ -16,12 +16,12 @@ class Wipe(TableController):
         super().__init__(table_api)
         self.changed = True
         self.color = wrgb_tuple_to_int(tuple(params.get("color", (50,50,50,50))))
-        speed = params.get("speed", 20)
+        speed = params.get("speed", 1.0)
         if speed == 0:
-            self.interval_ms = 200
+            self.interval_ms = 1000  # 1 second per row if speed is 0
         else:
-            self.interval_ms = 100 / speed
-
+            # More reasonable speed calculation: base 500ms per row, divided by speed
+            self.interval_ms = 500 / speed  # speed=1 -> 500ms, speed=0.5 -> 1000ms, speed=2 -> 250ms
 
         flat = get_row_grouped_node_ids(table_api, ring_count=4, scan_axis='r')
         # not fully working yet
@@ -31,6 +31,10 @@ class Wipe(TableController):
         self.current_row = 0
         self.last_update = time.time() * 1000  # current time in ms
 
+        # Reset all LEDs to off before starting the wipe animation
+        self.table_api.reset()
+        self.table_api.refresh()
+
     def doEffectLoop(self):
         now = time.time() * 1000  # current time in ms
         if self.current_row < len(self.wipe_rows):
@@ -38,6 +42,13 @@ class Wipe(TableController):
                 for nodeId in self.wipe_rows[self.current_row]:
                     self.table_api.fillNode(nodeId, self.color)
                 self.current_row += 1
+                self.last_update = now
+                self.changed = True
+        else:
+            # Animation completed, reset for next cycle
+            if now - self.last_update >= self.interval_ms:
+                self.table_api.reset()  # Clear all LEDs
+                self.current_row = 0    # Reset to first row
                 self.last_update = now
                 self.changed = True
 
