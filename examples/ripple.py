@@ -31,6 +31,7 @@ def get_random_color():
 class Ripple(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
+        
         self.auto_start = params.get("auto_start", 0)
         self.default_ripple_time = params.get("speed", 20)
         self.color = tuple(params.get("color", get_random_color()))
@@ -58,6 +59,7 @@ class Ripple(TableController):
             - If a neighbor is already active, its brightness is boosted (but not lowered).
             - Timing and brightness scaling per level are defined in a config list for easy future customization.
             """
+        print(f"[DEBUG] Ripple: onNodeTouched called for node {node_id}")
         self.ripple_timers[node_id] = self.default_ripple_time
         self.ripple_brightness[node_id] = 1
 
@@ -150,7 +152,6 @@ def main():
         if arg == "auto_start":
             params["auto_start"] = 1
 
-    
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     tc_led_table.init(config=led_table_config)
     app = Ripple(tc_led_table, params)

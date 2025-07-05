@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import random
+import json
 script_dir = os.path.dirname(__file__)
 sys.path.append('src')
 sys.path.append('src/pygame')
@@ -15,6 +16,8 @@ sys.path.append(os.path.abspath('cpplib/python_bindings/Release'))
 
 import tc_led_table
 from utils import int_to_wrgb_tuple
+from settings import get_config_value
+from communication.mqtt_client import setup_mqtt_client
 
 NODE_COUNT = 37
 
@@ -33,10 +36,40 @@ class TableController(TableDisplay):
         self.touched_node_ids = []
 
         self.last_effect_loop = time.time()
+        
+        # Set up MQTT client for touch events
+        self.mqtt_client = self._setup_mqtt_client()
+
+    def _setup_mqtt_client(self):
+        """Internal method to set up MQTT client for touch events"""
+        try:
+            broker = get_config_value("TableController", "mqtt_broker_address", "MQTT_BROKER_ADDRESS", default="localhost")
+            client_id = get_config_value("TableController", "mqtt_client_id", "MQTT_CLIENT_ID", default=f"table-controller-{random.randint(1000,9999)}")
+            mqtt_client = setup_mqtt_client(broker_address=broker, client_id=client_id)
+            
+            # Register for touch events
+            mqtt_client.register_listener("ledtable/sensor/touch_event", self._handle_mqtt_touch)
+            print(f"[DEBUG] TableController: MQTT client connected to {broker} as {client_id}")
+            return mqtt_client
+        except Exception as e:
+            print(f"[WARNING] TableController: Could not connect to MQTT broker: {e}")
+            return None
+
+    def _handle_mqtt_touch(self, client, userdata, msg):
+        """Internal MQTT touch event handler"""
+        try:
+            payload = json.loads(msg.payload.decode())
+            node_id = payload["nodeId"]
+            touched = payload["touched"]
+            print(f"[DEBUG] TableController: Received MQTT touch event - node {node_id}, touched={touched}")
+            
+            # Forward to the standard touch handler
+            self.handle_touch_event(node_id, touched)
+        except Exception as e:
+            print(f"[ERROR] TableController: Error handling MQTT touch: {e}")
 
     def tick(self):
         super().tick()
-        self.updateTouchedNodeIds()
         self.doEffectLoop()
         self.last_effect_loop = time.time()
 
@@ -62,39 +95,16 @@ class TableController(TableDisplay):
 
 
     def handle_touch_event(self, node_id, touched):
+        print(f"[DEBUG] TableController: handle_touch_event called - node {node_id}, touched={touched}")
         if touched:
             if node_id not in self.touched_node_ids:
                 self.touched_node_ids.insert(0, node_id)
+                print(f"[DEBUG] TableController: Calling onNodeTouched({node_id})")
                 self.onNodeTouched(node_id)
         else:
             if node_id in self.touched_node_ids:
                 self.touched_node_ids.remove(node_id)
+                print(f"[DEBUG] TableController: Calling onNodeUntouched({node_id})")
                 self.onNodeUntouched(node_id)
-    def updateTouchedNodeIds(self):
-        # deprecating this!!
-        return
-
-        # Fetch the latest list of IDs
-        all_touched = self.table_api.getAllTouchedNodeIds()
-
-        # Create a set for efficient look-up
-        all_touched_set = set(all_touched)
-        old_touched_set = set(self.touched_node_ids)
-
-        # Identify removed nodes and call onNodeUntouched for each
-        removed_nodes = old_touched_set - all_touched_set
-        for node_id in removed_nodes:
-            self.onNodeUntouched(node_id)
-
-        # Update touched_node_ids to only include currently touched nodes
-        self.touched_node_ids = [id_ for id_ in self.touched_node_ids if id_ in all_touched_set]
-
-        # Identify new nodes and call onNodeTouched for each, then add them to touched_node_ids
-        new_items = [id_ for id_ in all_touched if id_ not in self.touched_node_ids]
-        for node_id in new_items:
-            self.onNodeTouched(node_id)
-
-        # Prepend new items to maintain order with new items at the beginning
-        self.touched_node_ids = new_items + self.touched_node_ids
 
 

@@ -14,6 +14,7 @@ import time
 class Wipe(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
+        
         self.changed = True
         self.color = wrgb_tuple_to_int(tuple(params.get("color", (50,50,50,50))))
         speed = params.get("speed", 1.0)
@@ -34,6 +35,9 @@ class Wipe(TableController):
         # Reset all LEDs to off before starting the wipe animation
         self.table_api.reset()
         self.table_api.refresh()
+
+    def onNodeTouched(self, node_id):
+        print(f"[DEBUG] Wipe: onNodeTouched called for node {node_id} - this is a visual effect, touch doesn't change behavior")
 
     def doEffectLoop(self):
         now = time.time() * 1000  # current time in ms
@@ -77,7 +81,7 @@ def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     tc_led_table.init(config=led_table_config)
     app = Wipe(tc_led_table)
-    app.use_display  = False
+    app.use_display = False
     app.run()
 if __name__ == "__main__":
     main()

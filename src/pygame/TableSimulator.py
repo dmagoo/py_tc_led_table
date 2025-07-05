@@ -78,16 +78,19 @@ class TableSimulator(TableDisplay):
         self.updateNodeColor(node_id)
 
     def startHolding(self, node_id):
+        print(f"[DEBUG] TableSimulator: Mouse down on node {node_id} - publishing touch_event (touched=True)")
         publish_object(self.mqtt_client, "ledtable/sensor/touch_event", {"nodeId": node_id, "touched": True})
         self.node_states[node_id] = {"state": NodeState.HOLDING, "timestamp": time.time()}
         self.updateNodeColor(node_id)
 
     def setNodePinned(self, node_id):
+        print(f"[DEBUG] TableSimulator: Right-click pin on node {node_id} - publishing touch_event (touched=True)")
         publish_object(self.mqtt_client, "ledtable/sensor/touch_event", {"nodeId": node_id, "touched": True})
         self.node_states[node_id] = {"state": NodeState.PINNED}
         self.updateNodeColor(node_id)
 
     def setNodeInactive(self, node_id):
+        print(f"[DEBUG] TableSimulator: Node {node_id} going inactive - publishing touch_event (touched=False)")
         publish_object(self.mqtt_client, "ledtable/sensor/touch_event", {"nodeId": node_id, "touched": False})
         self.node_states[node_id] = {"state": NodeState.INACTIVE}
         self.updateNodeColor(node_id)

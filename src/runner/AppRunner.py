@@ -51,13 +51,17 @@ class AppRunner:
             payload = json.loads(msg.payload.decode())
             node_id = payload["nodeId"]
             touched = payload["touched"]
+            print(f"[DEBUG] AppRunner: Received MQTT touch_event - node {node_id}, touched={touched}")
             now = time.time()
             key = (node_id, touched)
             last_time = self.last_touch_times.get(key, 0)
             if (now - last_time) >= self.debounce_interval:
                 self.last_touch_times[key] = now
+                print(f"[DEBUG] AppRunner: Forwarding to app - node {node_id}, touched={touched}")
                 if self.current_app and hasattr(self.current_app, "handle_touch_event"):
                     self.current_app.handle_touch_event(node_id, touched)
+            else:
+                print(f"[DEBUG] AppRunner: Debounced touch event - node {node_id}, touched={touched} (too soon: {now - last_time:.3f}s < {self.debounce_interval}s)")
 
         except Exception as e:
             print(f"Error handling touch message: {e}", flush=True)

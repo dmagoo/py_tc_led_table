@@ -31,14 +31,18 @@ def get_random_color():
 class TestNode(TableController):
     def __init__(self, table_api, params = {}):
         super().__init__(table_api)
+        
         self.color = tuple(params.get("color", get_random_color()))
         self.node_states = {}
         
     def onNodeTouched(self, node_id):
+        print(f"[DEBUG] TestNode: onNodeTouched called for node {node_id}")
         if self.node_states.get(node_id) is None:
             self.node_states[node_id] = self.color #get_random_color()
+            print(f"[DEBUG] TestNode: Node {node_id} turned ON with color {self.color}")
         else:
             self.node_states[node_id] = None
+            print(f"[DEBUG] TestNode: Node {node_id} turned OFF")
 
     def doEffectLoop(self):
         for node_id in range(NODE_COUNT):
@@ -53,7 +57,7 @@ def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
     tc_led_table.init(config=led_table_config)
     app = TestNode(tc_led_table)
-    app.use_display  = False
+    app.use_display = False
     app.run()
 if __name__ == "__main__":
     main()
