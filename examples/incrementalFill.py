@@ -75,7 +75,6 @@ refresh
     
 def main():
     led_table_config = add_controller_config(tc_led_table.LedTableConfig())
-    led_table_config = add_sensor_listener_config(led_table_config)
     tc_led_table.init(config=led_table_config)
     app = IncrementalFill(tc_led_table)
     app.use_display  = False
